@@ -1,0 +1,10 @@
+{
+  "name": "tbitt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "npm run typecheck --prefix frontend && npm run typecheck --prefix backend",
+    "typecheck:frontend": "npm run typecheck --prefix frontend",
+    "typecheck:backend": "npm run typecheck --prefix backend"
+  }
+} 
