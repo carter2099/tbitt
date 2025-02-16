@@ -1,0 +1,200 @@
+.App {
+    text-align: center;
+    padding: 20px;
+}
+
+.scan-button {
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 20px 0;
+}
+
+.scan-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.token-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.token-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    position: relative;
+}
+
+.token-card .rank {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.token-card .metrics .address {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.copy-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 1em;
+    transition: transform 0.2s ease;
+}
+
+.copy-button.copied {
+    color: #4CAF50;
+    transform: scale(1.2);
+}
+
+.copy-button:hover {
+    opacity: 0.7;
+}
+
+.metrics {
+    text-align: left;
+    margin-top: 10px;
+}
+
+.metrics div {
+    margin: 5px 0;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 4px;
+    margin: 16px 0;
+    text-align: center;
+    border: 1px solid #ef9a9a;
+}
+
+/* Update admin panel styles to dev panel */
+.dev-panel {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px;
+    width: 100%;
+}
+
+.dev-panel h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.dev-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.scan-history {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.scan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+.scan-item {
+    padding: 12px 16px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    width: 100%;
+    display: block;
+    font-size: 14px;
+    color: #333;
+}
+
+.scan-item:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.scan-item.selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #45a049;
+}
+
+/* Add section headers */
+.scan-history h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.clear-button {
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.clear-button:hover {
+    background-color: #c82333;
+}
+
+.clear-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.scan-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+} 
