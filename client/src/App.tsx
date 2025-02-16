@@ -26,6 +26,7 @@ function App() {
     });
     const [initialLoading, setInitialLoading] = React.useState(true);
     const [countdown, setCountdown] = React.useState(60);
+    const [showDevPanel, setShowDevPanel] = React.useState(false);
 
     const fetchTokens = async (isInitial = false) => {
         try {
@@ -154,54 +155,56 @@ function App() {
 
     return (
         <div className="App">
-            <div className="dev-panel">
-                <h2>Dev Controls</h2>
-                <div className="dev-controls">
-                    <div className="button-group">
-                        <button 
-                            className="scan-button"
-                            onClick={handleImport}
-                            disabled={isImporting}
-                        >
-                            {isImporting ? 'Importing...' : 'Import New Tokens'}
-                        </button>
-                        <button 
-                            className="scan-button"
-                            onClick={handleAnalyze}
-                            disabled={isAnalyzing}
-                        >
-                            {isAnalyzing ? 'Analyzing...' : 'Analyze Recent Tokens'}
-                        </button>
-                        <button 
-                            className="scan-button"
-                            onClick={handleScore}
-                            disabled={isScoring}
-                        >
-                            {isScoring ? 'Scoring...' : 'Score Recent Tokens'}
-                        </button>
-                    </div>
-                    
-                    {importResult && (
-                        <div className="success-message">
-                            {importResult}
-                        </div>
-                    )}
-                    {analysisResult && (
-                        <div className="success-message">
-                            {analysisResult}
-                        </div>
-                    )}
-                    {scoringResult && (
-                        <div className="success-message">
-                            {scoringResult}
-                        </div>
-                    )}
-                </div>
-            </div>
-
             <header className="App-header">
                 <h1>The Boys in the Trenches™</h1>
             </header>
+
+            {showDevPanel && (
+                <div className="dev-panel">
+                    <h2>Dev Controls</h2>
+                    <div className="dev-controls">
+                        <div className="button-group">
+                            <button 
+                                className="scan-button"
+                                onClick={handleImport}
+                                disabled={isImporting}
+                            >
+                                {isImporting ? 'Importing...' : 'Import New Tokens'}
+                            </button>
+                            <button 
+                                className="scan-button"
+                                onClick={handleAnalyze}
+                                disabled={isAnalyzing}
+                            >
+                                {isAnalyzing ? 'Analyzing...' : 'Analyze Recent Tokens'}
+                            </button>
+                            <button 
+                                className="scan-button"
+                                onClick={handleScore}
+                                disabled={isScoring}
+                            >
+                                {isScoring ? 'Scoring...' : 'Score Recent Tokens'}
+                            </button>
+                        </div>
+                        
+                        {importResult && (
+                            <div className="success-message">
+                                {importResult}
+                            </div>
+                        )}
+                        {analysisResult && (
+                            <div className="success-message">
+                                {analysisResult}
+                            </div>
+                        )}
+                        {scoringResult && (
+                            <div className="success-message">
+                                {scoringResult}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {error && (
                 <div className="error-message">
@@ -234,6 +237,13 @@ function App() {
                     <TokenList tokens={tokenGroups.last_12h} />
                 </section>
             </main>
+
+            <div 
+                className="dev-shortcut-hint"
+                onClick={() => setShowDevPanel(prev => !prev)}
+            >
+                Click for dev controls
+            </div>
         </div>
     );
 }
