@@ -19,7 +19,9 @@ export class TokenService {
 
     async getNewTokens(): Promise<JupiterToken[]> {
         try {
+            console.log(`Calling ${this.JUPITER_NEW_TOKENS_URL}`);
             const response = await axios.get<JupiterToken[]>(this.JUPITER_NEW_TOKENS_URL);
+            console.log(`Received ${response.data.length} tokens from Jupiter API`);
             return response.data;
         } catch (error) {
             throw new APIError(
