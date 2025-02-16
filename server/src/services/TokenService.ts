@@ -9,6 +9,11 @@ interface Token {
     address: string;
     name: string;
     symbol: string;
+    volume_24h: number;
+    market_cap: number;
+    buys_24h: number;
+    sells_24h: number;
+    price_change_24h: number;
 }
 
 interface SocialMedia {
@@ -82,15 +87,28 @@ export class TokenService {
                 
             const totalSells24h = pairData.reduce((sum, pair) => 
                 sum + (pair.txns.h24?.sells || 0), 0);
+
+            // Calculate score with the metrics we have
+            const score = await this.calculateTokenScore({
+                address: token.address,
+                name: token.name,
+                symbol: token.symbol,
+                volume_24h: totalVolume,
+                market_cap: highestVolumePair.marketCap || 0,
+                buys_24h: totalBuys24h,
+                sells_24h: totalSells24h,
+                price_change_24h: highestVolumePair.priceChange.h24 || 0
+            });
             
-            console.log(`${token.name}: ${avgPrice}, ${totalVolume}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${this.calculateTokenScore(token)}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
+            console.log(`${token.name}: ${avgPrice}, ${totalVolume}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${score}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
+            
             return {
                 price: avgPrice,
                 volume24h: totalVolume,
                 marketCap: highestVolumePair.marketCap || 0,
                 liquidity: totalLiquidity,
                 holderCount: this.getHolderData(token),
-                totalScore: this.calculateTokenScore(token),
+                totalScore: score,
                 priceChange24h: highestVolumePair.priceChange.h24 || 0,
                 fdv: highestVolumePair.fdv || 0,
                 buys24h: totalBuys24h,
@@ -139,8 +157,45 @@ export class TokenService {
         return 0;
     }
 
-    private calculateTokenScore(token: Token): number {
-        return 0;
+    public async calculateTokenScore(token: Token): Promise<number> {
+        try {
+            // Get social media count for this token
+            const socialResult = await db.query(
+                'SELECT COUNT(*) as social_count FROM token_social_media WHERE token_address = $1',
+                [token.address]
+            );
+            const socialCount = parseInt(socialResult.rows[0]?.social_count || '0');
+
+            // Base metrics scoring
+            const volumeScore = Math.min(token.volume_24h / 1000, 100); // Max 100 points for volume
+            const marketCapScore = Math.min(token.market_cap / 10000, 50); // Max 50 points for market cap
+            
+            // Transaction activity scoring
+            const totalTx = token.buys_24h + token.sells_24h;
+            const txScore = Math.min(totalTx / 10, 30); // Max 30 points for transactions
+            
+            // Buy/Sell ratio scoring (positive ratio gets more points)
+            const txRatio = token.buys_24h / (token.sells_24h || 1);
+            const txRatioScore = Math.min(txRatio * 10, 20); // Max 20 points for buy/sell ratio
+            
+            // Price change scoring (moderate positive change is good)
+            let priceChangeScore = 0;
+            if (token.price_change_24h > 0 && token.price_change_24h < 100) {
+                priceChangeScore = Math.min(token.price_change_24h, 50); // Max 50 points for price change
+            }
+
+            // Social media presence scoring
+            const socialScore = Math.min(socialCount * 10, 30); // 10 points per social media, max 30 points
+
+            // Calculate total score
+            const totalScore = volumeScore + marketCapScore + txScore + txRatioScore + priceChangeScore + socialScore;
+
+            // Normalize to 0-100 range
+            return Math.min(Math.max(totalScore / 2.8, 0), 100);
+        } catch (error) {
+            console.error(`Error calculating score for token ${token.address}:`, error);
+            return 0;
+        }
     }
 
     private async saveSocialMedia(token: Token, pairData: DexScreenerPair[]): Promise<void> {

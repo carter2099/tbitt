@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { startTokenImportJob, importTokens } from './jobs/tokenImport';
 import { startTokenAnalysisJob, analyzeRecentTokens } from './jobs/tokenAnalysis';
 import { startTokenScoringJob, scoreRecentTokens } from './jobs/tokenScoring';
+import { startTokenRefreshJob } from './jobs/tokenRefresh';
 import { db } from './db';
 
 
@@ -20,6 +21,7 @@ app.use(express.json());
 startTokenImportJob();
 startTokenAnalysisJob();
 startTokenScoringJob();
+startTokenRefreshJob();
 
 // Add manual trigger endpoints
 app.post('/api/import-tokens', async (_req: Request, res: Response) => {

@@ -127,10 +127,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 </div>
                 <div>Created: {formatDate(token.mintDate)}</div>
                 <div>Price: {formatPrice(token.currentPrice)}</div>
-                <div>24h Change: {formatPercentage(token.priceChange24h)}</div>
-                <div>24h Volume: {formatNumber(token.volume24h)}</div>
                 <div>Market Cap: {formatNumber(token.marketCap)}</div>
-                <div>FDV: {formatNumber(token.fdv)}</div>
                 {/* <div>Holders: {(token.holderCount || 0).toLocaleString()}</div> */}
                 <div>Holders: TODO</div>
                 <div>Liquidity: {token.liquidity && token.liquidity > 0 ? formatNumber(token.liquidity) : '?'}</div>
