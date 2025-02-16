@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { DexScreenerPair } from '../types/api';
+import { DexScreenerPair, JupiterToken } from '../types/api';
 import { TokenAnalysis } from '../types/token';
+import { APIError } from '../types/errors';
 
 // Add Token interface if not already defined
 interface Token {
@@ -10,9 +11,21 @@ interface Token {
 }
 
 export class TokenService {
+    private readonly JUPITER_NEW_TOKENS_URL = 'https://api.jup.ag/tokens/v1/new';
     private readonly DEX_SCREENER_BASE_URL = 'https://api.dexscreener.com/token-pairs/v1/solana';
 
     constructor() {
+    }
+
+    async getNewTokens(): Promise<JupiterToken[]> {
+        try {
+            const response = await axios.get<JupiterToken[]>(this.JUPITER_NEW_TOKENS_URL);
+            return response.data;
+        } catch (error) {
+            throw new APIError(
+                `Failed to fetch new tokens from Jupiter: ${error instanceof Error ? error.message : 'Unknown error'}`
+            );
+        }
     }
 
     async analyzeToken(token: Token): Promise<TokenAnalysis> {

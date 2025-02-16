@@ -24,19 +24,3 @@ export interface TokenAnalysis {
     priceChange24h: number;
     fdv: number;
 }
-
-export interface RawTokenTransaction {
-    signature: string;
-    timestamp: number;
-    tokenAddress: string;
-    amount: number;
-    price: number;
-}
-
-export interface TokenMetrics {
-    volume24h: number;
-    transactions24h: number;
-    uniqueWallets24h: number;
-    priceChange24h: number;
-    currentPrice: number;
-} 

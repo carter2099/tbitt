@@ -11,12 +11,6 @@ export class AppError extends Error {
     }
 }
 
-export class TokenScanError extends AppError {
-    constructor(message: string) {
-        super(message, 500);
-    }
-}
-
 export class APIError extends AppError {
     constructor(message: string, statusCode: number = 500) {
         super(message, statusCode);

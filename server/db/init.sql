@@ -24,5 +24,3 @@ CREATE TABLE token (
 );
 
 CREATE INDEX idx_tokens_address ON token(address);
-CREATE INDEX idx_tokens_needs_analysis ON token(needs_analysis) WHERE needs_analysis = true;
-CREATE INDEX idx_tokens_rank ON token(rank) WHERE rank IS NOT NULL;
