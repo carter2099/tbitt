@@ -141,7 +141,7 @@ export class TokenService {
         }
     }
 
-    private async getDexScreenerData(token: Token, overflow: boolean = false): Promise<DexScreenerPair[] | null> {
+    private async getDexScreenerData(token: Token, callCount: number = 0): Promise<DexScreenerPair[] | null> {
         try {
             const response = await axios.get<DexScreenerPair[]>(
                 `${this.DEX_SCREENER_BASE_URL}/${token.address}`
@@ -155,13 +155,13 @@ export class TokenService {
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 429) {
-                if (overflow) {
+                if (callCount > 3) {
                     return null;
                 }
-                console.log('Rate limit hit, waiting 60 seconds...');
-                await new Promise(resolve => setTimeout(resolve, 60000));
+                console.log('Rate limit hit, waiting 30 seconds...');
+                await new Promise(resolve => setTimeout(resolve, 30000));
                 // Retry the request after waiting
-                return this.getDexScreenerData(token, true);
+                return this.getDexScreenerData(token, callCount + 1);
             } else if (axios.isAxiosError(error)) {
                 console.error(`DexScreener API error for ${token.name}:`, {
                     status: error.response?.status,
