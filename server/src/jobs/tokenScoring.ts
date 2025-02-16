@@ -1,56 +1,115 @@
 import cron from 'node-cron';
 import { db } from '../db';
+import { Token } from '../types/token';
 
 let isScoringRunning = false;
 
-interface Token {
-    address: string;
-    volume_24h: number;
-    market_cap: number;
-    buys_24h: number;
-    sells_24h: number;
-    price_change_24h: number;
+interface DexScreenerPair {
+    volume: { h24: number };
+    txns: { h24: { buys: number; sells: number } };
+    priceChange: { h24: number; m5: number };
 }
 
 async function calculateTokenScore(token: Token): Promise<number> {
-    try {
-        // Get social media count for this token
-        const socialResult = await db.query(
-            'SELECT COUNT(*) as social_count FROM token_social_media WHERE token_address = $1',
-            [token.address]
-        );
-        const socialCount = parseInt(socialResult.rows[0]?.social_count || '0');
-
-        // Base metrics scoring
-        const volumeScore = Math.min(token.volume_24h / 1000, 100); // Max 100 points for volume
-        const marketCapScore = Math.min(token.market_cap / 10000, 50); // Max 50 points for market cap
-        
-        // Transaction activity scoring
-        const totalTx = token.buys_24h + token.sells_24h;
-        const txScore = Math.min(totalTx / 10, 30); // Max 30 points for transactions
-        
-        // Buy/Sell ratio scoring (positive ratio gets more points)
-        const txRatio = token.buys_24h / (token.sells_24h || 1);
-        const txRatioScore = Math.min(txRatio * 10, 20); // Max 20 points for buy/sell ratio
-        
-        // Price change scoring (moderate positive change is good)
-        let priceChangeScore = 0;
-        if (token.price_change_24h > 0 && token.price_change_24h < 100) {
-            priceChangeScore = Math.min(token.price_change_24h, 50); // Max 50 points for price change
-        }
-
-        // Social media presence scoring
-        const socialScore = Math.min(socialCount * 10, 30); // 10 points per social media, max 30 points
-
-        // Calculate total score
-        const totalScore = volumeScore + marketCapScore + txScore + txRatioScore + priceChangeScore + socialScore;
-
-        // Normalize to 0-100 range
-        return Math.min(Math.max(totalScore / 2.8, 0), 100);
-    } catch (error) {
-        console.error(`Error calculating score for token ${token.address}:`, error);
+    // hard rules
+    if (token.marketCap > 30000000) {
+        console.log('Token rejected: Market cap too high');
         return 0;
     }
+    if (token.priceChangeM5 < -20) {
+        console.log('Token rejected: Price dropped too much in 5m');
+        return 0;
+    }
+    if (token.priceChange24h < -30) {
+        console.log('Token rejected: Price dropped too much in 24h');
+        return 0;
+    }
+    
+    const volumeWeight = 0.20;
+    const liquidityWeight = 0.35;
+    const holderWeight = 0.15;
+    const txCountWeight = 0.15;
+    const priceActionWeight = 0.05;
+
+    // Volume score - Compare 24h volume to liquidity
+    const volumeToLiquidityRatio = token.liquidity > 0 ? token.volume24h / token.liquidity : 0;
+    const volumeScore = Math.min(Math.max(volumeToLiquidityRatio / 3, 0), 1);
+
+    // Liquidity score
+    const liquidityScore = token.liquidity > 0 ? 
+        Math.min(Math.log10(token.liquidity) / Math.log10(1000000), 1) : 0;
+
+    // Holder score
+    const holderScore = token.holderCount > 0 ? 
+        Math.min(Math.log10(token.holderCount) / Math.log10(1000), 1) : 0;
+
+    // Transaction count score
+    const txCount = (token.txns24h.buys || 0) + (token.txns24h.sells || 0);
+    const txScore = txCount > 0 ? 
+        Math.min(Math.log10(txCount) / Math.log10(1000), 1) : 0;
+
+    // Price action scoring
+    const priceChange = token.priceChange24h || 0;
+    let priceActionScore = 0;
+
+    if (priceChange > 0) {
+        if (priceChange <= 50) {
+            priceActionScore = Math.min(priceChange / 50, 1);
+        } else {
+            priceActionScore = Math.max(0.5, 1 - ((priceChange - 50) / 150));
+        }
+    } else {
+        const normalizedDrop = Math.abs(priceChange);
+        if (normalizedDrop <= 10) {
+            priceActionScore = Math.max(0, 1 - (normalizedDrop / 10));
+        } else {
+            priceActionScore = Math.max(0, Math.exp(-0.15 * (normalizedDrop - 10)) * 0.5);
+        }
+    }
+
+    // Calculate initial score
+    let totalScore = (
+        volumeScore * volumeWeight +
+        liquidityScore * liquidityWeight +
+        holderScore * holderWeight +
+        txScore * txCountWeight +
+        priceActionScore * priceActionWeight
+    );
+
+    // Add buy/sell ratio penalty
+    const buys = token.txns24h.buys || 0;
+    const sells = token.txns24h.sells || 0;
+    
+    if (buys > 0) {
+        const buyToSellRatio = sells > 0 ? buys / sells : buys;
+        let ratioPenalty = 0;
+
+        if (buys <= 7 || buyToSellRatio <= 5) {
+            ratioPenalty = 0;
+        }
+        else if (sells === 0) {
+            ratioPenalty = Math.min(0.9, (buys - 7) / 50);
+        } else {
+            ratioPenalty = Math.min(0.7, (buyToSellRatio - 5) / 20);
+        }
+
+        totalScore *= (1 - ratioPenalty);
+    }
+
+    // Apply penalties for price drops
+    if (priceChange < 0) {
+        const dropPenaltyFactor = Math.abs(priceChange) / 100;
+        const penaltyMultiplier = Math.exp(-dropPenaltyFactor * 2);
+        totalScore *= penaltyMultiplier;
+
+        if (priceChange < -10) totalScore *= 0.7;
+        if (priceChange < -20) totalScore *= 0.5;
+        if (priceChange < -30) totalScore *= 0.3;
+        if (priceChange < -50) totalScore *= 0.1;
+        if (priceChange < -70) totalScore *= 0.01;
+    }
+
+    return totalScore * 100;
 }
 
 export async function scoreRecentTokens() {
@@ -66,21 +125,32 @@ export async function scoreRecentTokens() {
     try {
         const tokens = await db.query(`
             SELECT 
-                address,
-                volume_24h,
-                market_cap,
-                buys_24h,
-                sells_24h,
-                price_change_24h
-            FROM token 
-            WHERE mint_date > NOW() - INTERVAL '24 hours'
+                t.*,
+                COALESCE(t.txns_24h_buys, 0) as txns_24h_buys,
+                COALESCE(t.txns_24h_sells, 0) as txns_24h_sells,
+                COALESCE(t.market_cap, 0) as "marketCap",
+                COALESCE(t.volume_24h, 0) as "volume24h",
+                COALESCE(t.liquidity, 0) as liquidity,
+                COALESCE(t.holder_count, 0) as "holderCount",
+                COALESCE(t.price_change_24h, 0) as "priceChange24h",
+                COALESCE(t.price_change_m5, 0) as "priceChangeM5"
+            FROM token t
+            WHERE t.mint_date > NOW() - INTERVAL '24 hours'
         `);
 
+        console.log(`Found ${tokens.rows.length} tokens to score`);
+        
         let scoredCount = 0;
         for (const token of tokens.rows) {
             try {
-                const score = await calculateTokenScore(token);
-                
+                const score = await calculateTokenScore({
+                    ...token,
+                    txns24h: {
+                        buys: token.txns_24h_buys || 0,
+                        sells: token.txns_24h_sells || 0
+                    }
+                });
+
                 await db.query(`
                     UPDATE token 
                     SET 

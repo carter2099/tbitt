@@ -53,11 +53,17 @@ export class TokenService {
                 return {
                     price: 0,
                     volume24h: 0,
+                    volumeH6: 0,
+                    volumeH1: 0,
+                    volumeM5: 0,
                     marketCap: 0,
                     liquidity: 0,
                     holderCount: 0,
                     totalScore: 0,
                     priceChange24h: 0,
+                    priceChangeH6: 0,
+                    priceChangeH1: 0,
+                    priceChangeM5: 0,
                     fdv: 0,
                     buys24h: 0,
                     sells24h: 0
@@ -75,7 +81,16 @@ export class TokenService {
             const avgPrice = pairData.reduce((sum, pair) => 
                 sum + parseFloat(pair.priceUsd), 0) / pairData.length;
             
-            const totalVolume = pairData.reduce((sum, pair) => 
+            const totalVolumeM5 = pairData.reduce((sum, pair) => 
+                sum + (pair.volume.m5 || 0), 0);
+            
+            const totalVolumeH1 = pairData.reduce((sum, pair) => 
+                sum + (pair.volume.h1 || 0), 0);
+            
+            const totalVolumeH6 = pairData.reduce((sum, pair) => 
+                sum + (pair.volume.h6 || 0), 0);
+
+            const totalVolume24h = pairData.reduce((sum, pair) => 
                 sum + pair.volume.h24, 0);
 
             const totalLiquidity = pairData.reduce((sum, pair) => 
@@ -93,23 +108,29 @@ export class TokenService {
                 address: token.address,
                 name: token.name,
                 symbol: token.symbol,
-                volume_24h: totalVolume,
+                volume_24h: totalVolume24h,
                 market_cap: highestVolumePair.marketCap || 0,
                 buys_24h: totalBuys24h,
                 sells_24h: totalSells24h,
                 price_change_24h: highestVolumePair.priceChange.h24 || 0
             });
             
-            console.log(`${token.name}: ${avgPrice}, ${totalVolume}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${score}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
+            console.log(`${token.name}: ${avgPrice}, ${totalVolume24h}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${score}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
             
             return {
                 price: avgPrice,
-                volume24h: totalVolume,
+                volume24h: totalVolume24h,
+                volumeH6: totalVolumeH6,
+                volumeH1: totalVolumeH1,
+                volumeM5: totalVolumeM5,
                 marketCap: highestVolumePair.marketCap || 0,
                 liquidity: totalLiquidity,
                 holderCount: this.getHolderData(token),
                 totalScore: score,
                 priceChange24h: highestVolumePair.priceChange.h24 || 0,
+                priceChangeH6: highestVolumePair.priceChange.h6 || 0,
+                priceChangeH1: highestVolumePair.priceChange.h1 || 0,
+                priceChangeM5: highestVolumePair.priceChange.m5 || 0,
                 fdv: highestVolumePair.fdv || 0,
                 buys24h: totalBuys24h,
                 sells24h: totalSells24h

@@ -109,10 +109,34 @@ function TokenCard({ token, rank }: TokenCardProps) {
         return `https://x.com/search?q=${encodeURIComponent(query)}`;
     };
 
+    const formatVolume = (volume: number) => {
+        if (volume >= 1000000) {
+            return `$${(volume / 1000000).toFixed(2)}M`;
+        } else if (volume >= 1000) {
+            return `$${(volume / 1000).toFixed(2)}K`;
+        }
+        return `$${volume.toFixed(2)}`;
+    };
+
+    const getDexScreenerUrl = (address: string): string => {
+        return `https://dexscreener.com/solana/${address}`;
+    };
+
     return (
         <div className="token-card">
             <div className="rank">#{rank}</div>
-            <h3>{token.name || 'Unknown'} (${token.symbol || '???'})</h3>
+            <h3>
+                {token.name || 'Unknown'} (${token.symbol || '???'})
+                <a 
+                    href={getDexScreenerUrl(token.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="chart-link"
+                    title="View chart on DEX Screener"
+                >
+                    📈
+                </a>
+            </h3>
             <div className="metrics">
                 <div>
                     Address:{" "}
@@ -177,6 +201,11 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     >
                         ${token.symbol}
                     </a>
+                </div>
+                <div className="volume-metrics">
+                    <div>Volume 5m: {formatVolume(token.volumeM5)}</div>
+                    <div>Volume 1h: {formatVolume(token.volumeH1)}</div>
+                    <div>Volume 24h: {formatVolume(token.volume24h)}</div>
                 </div>
             </div>
         </div>

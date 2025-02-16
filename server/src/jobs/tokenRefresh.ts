@@ -38,25 +38,37 @@ export async function refreshTopTokens() {
                 const analysis = await tokenService.analyzeToken(token);
 
                 if (analysis) {
-                    // Update token data
+                    // Update token data with all price changes
                     await db.query(`
                         UPDATE token
                         SET 
                             current_price = $1,
                             price_change_24h = $2,
-                            volume_24h = $3,
-                            market_cap = $4,
-                            fdv = $5,
-                            liquidity = $6,
-                            holder_count = $7,
-                            buys_24h = $8,
-                            sells_24h = $9,
+                            price_change_h6 = $3,
+                            price_change_h1 = $4,
+                            price_change_m5 = $5,
+                            volume_24h = $6,
+                            volume_h6 = $7,
+                            volume_h1 = $8,
+                            volume_m5 = $9,
+                            market_cap = $10,
+                            fdv = $11,
+                            liquidity = $12,
+                            holder_count = $13,
+                            txns_24h_buys = $14,
+                            txns_24h_sells = $15,
                             last_analysis = NOW()
-                        WHERE address = $10
+                        WHERE address = $16
                     `, [
                         analysis.price,
                         analysis.priceChange24h,
+                        analysis.priceChangeH6,
+                        analysis.priceChangeH1,
+                        analysis.priceChangeM5,
                         analysis.volume24h,
+                        analysis.volumeH6,
+                        analysis.volumeH1,
+                        analysis.volumeM5,
                         analysis.marketCap,
                         analysis.fdv,
                         analysis.liquidity,

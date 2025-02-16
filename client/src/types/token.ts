@@ -6,6 +6,8 @@ export interface Token {
     currentPrice: number;
     priceChange24h: number;
     volume24h: number;
+    volumeH1: number;
+    volumeM5: number;
     marketCap: number;
     fdv: number;
     liquidity: number;

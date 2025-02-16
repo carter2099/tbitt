@@ -400,4 +400,37 @@ body {
 
 .dev-shortcut-hint:active {
     transform: scale(0.95);
+}
+
+.volume-metrics {
+    display: flex;
+    gap: 12px;
+    margin: 8px 0;
+    padding: 8px;
+    background-color: var(--darker-bg);
+    border-radius: 4px;
+}
+
+.volume-metrics > div {
+    flex: 1;
+    text-align: center;
+    padding: 4px;
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.volume-metrics > div:hover {
+    background-color: var(--neon-blue);
+    color: var(--darker-bg);
+}
+
+.chart-link {
+    display: inline-block;
+    margin-left: 8px;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.chart-link:hover {
+    transform: scale(1.2);
 } 

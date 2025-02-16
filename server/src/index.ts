@@ -88,6 +88,9 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                     t.current_price,
                     t.price_change_24h,
                     t.volume_24h,
+                    t.volume_h1,
+                    t.volume_h6,
+                    t.volume_m5,
                     t.market_cap,
                     t.fdv,
                     t.liquidity,
@@ -104,7 +107,6 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                 WHERE t.mint_date > (SELECT latest_mint - INTERVAL '12 hours' FROM TokenRanges)
                     AND t.total_score > 0
                     AND t.total_score IS NOT NULL
-                ORDER BY t.mint_date DESC
             ),
             LimitedGroups AS (
                 SELECT *
@@ -129,8 +131,9 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                 LEFT JOIN token_social_media tsm ON lg.address = tsm.token_address
                 GROUP BY 
                     lg.address, lg.name, lg.symbol, lg.mint_date, lg.current_price, 
-                    lg.price_change_24h, lg.volume_24h, lg.market_cap, lg.fdv, 
-                    lg.liquidity, lg.holder_count, lg.total_score, lg.time_group, lg.rn
+                    lg.price_change_24h, lg.volume_24h, lg.volume_h1, lg.volume_h6, lg.volume_m5,
+                    lg.market_cap, lg.fdv, lg.liquidity, lg.holder_count, lg.total_score, 
+                    lg.time_group, lg.rn
             )
             SELECT 
                 time_group,
@@ -143,6 +146,8 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                         'currentPrice', COALESCE(current_price, 0),
                         'priceChange24h', COALESCE(price_change_24h, 0),
                         'volume24h', COALESCE(volume_24h, 0),
+                        'volumeH1', COALESCE(volume_h1, 0),
+                        'volumeM5', COALESCE(volume_m5, 0),
                         'marketCap', COALESCE(market_cap, 0),
                         'fdv', COALESCE(fdv, 0),
                         'liquidity', COALESCE(liquidity, 0),
@@ -151,7 +156,7 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                         'volume', COALESCE(volume_24h, 0),
                         'socials', COALESCE(socials, '[]'::json)
                     )
-                    ORDER BY total_score DESC nulls last, mint_date DESC
+                    ORDER BY total_score DESC nulls last, volume_24h DESC
                 ) as tokens
             FROM TokensWithSocials
             GROUP BY time_group
