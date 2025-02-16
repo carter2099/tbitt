@@ -45,7 +45,7 @@ export interface DexScreenerPair {
         h6: number;
         h24: number;
     };
-    liquidity: {
+    liquidity?: {
         usd: number;
         base: number;
         quote: number;

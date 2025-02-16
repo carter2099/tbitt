@@ -3,6 +3,7 @@ import cors from 'cors';
 import { AppError } from './types/errors';
 import dotenv from 'dotenv';
 import { startTokenImportJob, importTokens } from './jobs/tokenImport';
+import { startTokenAnalysisJob, analyzeRecentTokens } from './jobs/tokenAnalysis';
 import { db } from './db';
 
 
@@ -16,8 +17,9 @@ app.use(express.json());
 
 // Start background jobs
 startTokenImportJob();
+startTokenAnalysisJob();
 
-// Add manual trigger endpoint
+// Add manual trigger endpoints
 app.post('/api/import-tokens', async (_req: Request, res: Response) => {
     try {
         const result = await importTokens();
@@ -26,6 +28,18 @@ app.post('/api/import-tokens', async (_req: Request, res: Response) => {
         res.status(500).json({ 
             success: false, 
             message: 'Failed to trigger import' 
+        });
+    }
+});
+
+app.post('/api/analyze-tokens', async (_req: Request, res: Response) => {
+    try {
+        const result = await analyzeRecentTokens();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to trigger analysis' 
         });
     }
 });
@@ -72,6 +86,7 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                 FROM token t
                 CROSS JOIN TokenRanges r
                 WHERE t.mint_date > (SELECT latest_mint - INTERVAL '12 hours' FROM TokenRanges)
+                ORDER BY t.mint_date DESC
             ),
             LimitedGroups AS (
                 SELECT *

@@ -4,14 +4,21 @@
 }
 
 .scan-button {
+    flex: 1;
+    max-width: 200px;
     padding: 12px 24px;
-    font-size: 18px;
+    font-size: 16px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin: 20px 0;
+    margin: 0;  /* Remove margin since we're using gap */
+    transition: background-color 0.2s;
+}
+
+.scan-button:hover {
+    background-color: #45a049;
 }
 
 .scan-button:disabled {
@@ -179,7 +186,8 @@
 .button-group {
     display: flex;
     gap: 12px;
-    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .clear-button {

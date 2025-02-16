@@ -13,7 +13,9 @@ interface TokenGroups {
 function App() {
     const [error, setError] = React.useState<string | null>(null);
     const [isImporting, setIsImporting] = React.useState(false);
+    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const [importResult, setImportResult] = React.useState<string | null>(null);
+    const [analysisResult, setAnalysisResult] = React.useState<string | null>(null);
     const [tokenGroups, setTokenGroups] = React.useState<TokenGroups>({
         last_15m: [],
         last_1h: [],
@@ -77,6 +79,32 @@ function App() {
         }
     };
 
+    const handleAnalyze = async () => {
+        setError(null);
+        setAnalysisResult(null);
+        setIsAnalyzing(true);
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/analyze-tokens`, {
+                method: 'POST',
+            });
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message);
+            }
+
+            setAnalysisResult(data.message);
+            // Refresh tokens after analysis
+            fetchTokens();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to analyze tokens');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     if (isLoading) {
         return <div className="loading">Loading tokens...</div>;
     }
@@ -91,17 +119,31 @@ function App() {
             <div className="dev-panel">
                 <h2>Dev Controls</h2>
                 <div className="dev-controls">
-                    <button 
-                        className="scan-button"
-                        onClick={handleImport}
-                        disabled={isImporting}
-                    >
-                        {isImporting ? 'Importing...' : 'Import New Tokens'}
-                    </button>
+                    <div className="button-group">
+                        <button 
+                            className="scan-button"
+                            onClick={handleImport}
+                            disabled={isImporting}
+                        >
+                            {isImporting ? 'Importing...' : 'Import New Tokens'}
+                        </button>
+                        <button 
+                            className="scan-button"
+                            onClick={handleAnalyze}
+                            disabled={isAnalyzing}
+                        >
+                            {isAnalyzing ? 'Analyzing...' : 'Analyze Recent Tokens'}
+                        </button>
+                    </div>
                     
                     {importResult && (
                         <div className="success-message">
                             {importResult}
+                        </div>
+                    )}
+                    {analysisResult && (
+                        <div className="success-message">
+                            {analysisResult}
                         </div>
                     )}
                 </div>

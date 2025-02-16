@@ -63,8 +63,9 @@ export class TokenService {
                 sum + pair.volume.h24, 0);
 
             const totalLiquidity = pairData.reduce((sum, pair) => 
-                sum + pair.liquidity.usd, 0);
+                sum + (pair.liquidity?.usd || 0), 0);
 
+            console.log(`${token.name}: ${avgPrice}, ${totalVolume}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${this.calculateTokenScore(token)}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
             return {
                 price: avgPrice,
                 volume24h: totalVolume,
@@ -81,8 +82,9 @@ export class TokenService {
         }
     }
 
-    private async getDexScreenerData(token: Token): Promise<DexScreenerPair[] | null> {
+    private async getDexScreenerData(token: Token, overflow: boolean = false): Promise<DexScreenerPair[] | null> {
         try {
+            console.log(`Calling ${this.DEX_SCREENER_BASE_URL}/${token.address}`);
             const response = await axios.get<DexScreenerPair[]>(
                 `${this.DEX_SCREENER_BASE_URL}/${token.address}`
             );
@@ -95,10 +97,13 @@ export class TokenService {
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 429) {
+                if (overflow) {
+                    return null;
+                }
                 console.log('Rate limit hit, waiting 60 seconds...');
                 await new Promise(resolve => setTimeout(resolve, 60000));
                 // Retry the request after waiting
-                return this.getDexScreenerData(token);
+                return this.getDexScreenerData(token, true);
             } else if (axios.isAxiosError(error)) {
                 console.error(`DexScreener API error for ${token.name}:`, {
                     status: error.response?.status,
