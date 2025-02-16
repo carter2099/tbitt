@@ -12,88 +12,86 @@ interface Token {
     price_change_24h: number;
 }
 
-function normalizeLog(value: number, minValue: number = 1): number {
-    if (value <= 0) return 0;
-    const logValue = Math.log(Math.max(value, minValue));
-    return logValue / Math.log(1e9); // Normalize against a billion (reasonable max)
-}
+async function calculateTokenScore(token: Token): Promise<number> {
+    try {
+        // Get social media count for this token
+        const socialResult = await db.query(
+            'SELECT COUNT(*) as social_count FROM token_social_media WHERE token_address = $1',
+            [token.address]
+        );
+        const socialCount = parseInt(socialResult.rows[0]?.social_count || '0');
 
-function calculateTokenScore(token: Token): number {
-    // Volume Score (35%)
-    const volumeScore = normalizeLog(token.volume_24h);
+        // Base metrics scoring
+        const volumeScore = Math.min(token.volume_24h / 1000, 100); // Max 100 points for volume
+        const marketCapScore = Math.min(token.market_cap / 10000, 50); // Max 50 points for market cap
+        
+        // Transaction activity scoring
+        const totalTx = token.buys_24h + token.sells_24h;
+        const txScore = Math.min(totalTx / 10, 30); // Max 30 points for transactions
+        
+        // Buy/Sell ratio scoring (positive ratio gets more points)
+        const txRatio = token.buys_24h / (token.sells_24h || 1);
+        const txRatioScore = Math.min(txRatio * 10, 20); // Max 20 points for buy/sell ratio
+        
+        // Price change scoring (moderate positive change is good)
+        let priceChangeScore = 0;
+        if (token.price_change_24h > 0 && token.price_change_24h < 100) {
+            priceChangeScore = Math.min(token.price_change_24h, 50); // Max 50 points for price change
+        }
 
-    // Liquidity Score (25%)
-    const liquidityScore = normalizeLog(token.market_cap);
+        // Social media presence scoring
+        const socialScore = Math.min(socialCount * 10, 30); // 10 points per social media, max 30 points
 
-    // Buy Ratio Score (20%)
-    const totalTrades = token.buys_24h + token.sells_24h;
-    const buyRatio = totalTrades > 0 ? token.buys_24h / totalTrades : 0.5;
+        // Calculate total score
+        const totalScore = volumeScore + marketCapScore + txScore + txRatioScore + priceChangeScore + socialScore;
 
-    // Price Action Score (20%)
-    const priceMultiplier = token.price_change_24h > 0 ? 1 : 0.5;
-    const volatilityFactor = 1 - Math.min(Math.abs(token.price_change_24h) / 100, 1);
-    const priceActionScore = priceMultiplier * volatilityFactor;
-
-    // Calculate weighted score
-    const score = (
-        (0.35 * volumeScore) +
-        (0.25 * liquidityScore) +
-        (0.20 * buyRatio) +
-        (0.20 * priceActionScore)
-    );
-
-    // Normalize to 0-100 range
-    return Math.min(Math.max(score * 100, 0), 100);
+        // Normalize to 0-100 range
+        return Math.min(Math.max(totalScore / 2.8, 0), 100);
+    } catch (error) {
+        console.error(`Error calculating score for token ${token.address}:`, error);
+        return 0;
+    }
 }
 
 export async function scoreRecentTokens() {
     if (isScoringRunning) {
-        console.log('Token scoring job already running, skipping...');
-        return { success: false, message: 'Scoring already running' };
+        console.log('Scoring already in progress');
+        return;
     }
 
     isScoringRunning = true;
     const startTime = new Date();
-    console.log(`[${startTime.toISOString()}] Starting token scoring job...`);
+    console.log(`[${startTime.toISOString()}] Starting token scoring...`);
 
     try {
-        // Get tokens from the last 15 minutes that haven't been scored
-        const result = await db.query(`
+        const tokens = await db.query(`
             SELECT 
                 address,
                 volume_24h,
                 market_cap,
-                COALESCE(buys_24h, 0) as buys_24h,
-                COALESCE(sells_24h, 0) as sells_24h,
+                buys_24h,
+                sells_24h,
                 price_change_24h
-            FROM token
-            WHERE 
-                mint_date > NOW() - INTERVAL '15 minutes'
-                AND last_analysis IS NOT NULL
-                AND last_score IS NULL
+            FROM token 
+            WHERE mint_date > NOW() - INTERVAL '24 hours'
         `);
 
-        const tokens = result.rows;
-        console.log(`Found ${tokens.length} tokens to score`);
-
         let scoredCount = 0;
-
-        for (const token of tokens) {
+        for (const token of tokens.rows) {
             try {
-                const score = calculateTokenScore(token);
-
+                const score = await calculateTokenScore(token);
+                
                 await db.query(`
-                    UPDATE token
+                    UPDATE token 
                     SET 
                         total_score = $1,
                         last_score = NOW()
                     WHERE address = $2
                 `, [score, token.address]);
-
+                
                 scoredCount++;
             } catch (error) {
                 console.error(`Failed to score token ${token.address}:`, error);
-                // Continue with next token even if one fails
             }
         }
 
@@ -103,36 +101,25 @@ export async function scoreRecentTokens() {
         console.log(`[${endTime.toISOString()}] Scoring completed in ${duration}ms`);
         console.log(`Successfully scored ${scoredCount} tokens`);
 
-        return { 
-            success: true, 
-            message: `Scored ${scoredCount} tokens`,
-            details: {
-                tokensFound: tokens.length,
-                tokensScored: scoredCount,
-                duration: `${duration}ms`
-            }
+        return {
+            success: true,
+            message: `Scored ${scoredCount} tokens`
         };
     } catch (error) {
-        const endTime = new Date();
-        console.error(`[${endTime.toISOString()}] Token scoring job failed:`, error);
-        return { 
-            success: false, 
-            message: 'Job failed: ' + (error instanceof Error ? error.message : 'Unknown error'),
-            details: {
-                error: error instanceof Error ? error.stack : 'Unknown error',
-                duration: `${endTime.getTime() - startTime.getTime()}ms`
-            }
-        };
+        console.error('Failed to score tokens:', error);
+        throw error;
     } finally {
         isScoringRunning = false;
     }
 }
 
 export function startTokenScoringJob() {
-    // Run every minute
-    cron.schedule('*/1 * * * *', async () => {
-        console.log('Running scheduled token scoring...');
-        const result = await scoreRecentTokens();
-        console.log('Scoring result:', result);
+    // Run every 5 minutes
+    cron.schedule('*/5 * * * *', async () => {
+        try {
+            await scoreRecentTokens();
+        } catch (error) {
+            console.error('Token scoring job failed:', error);
+        }
     });
 } 

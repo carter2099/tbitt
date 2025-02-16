@@ -87,6 +87,28 @@ function TokenCard({ token, rank }: TokenCardProps) {
         return date.toLocaleString();
     };
 
+    // Helper function to get icon and style for social media type
+    const getSocialIcon = (type: string): { icon: string; className?: string } => {
+        switch (type.toLowerCase()) {
+            case 'twitter':
+                return { icon: '𝕏', className: 'twitter-icon' }; // Using mathematical bold X for Twitter/X
+            case 'telegram':
+                return { icon: '📱' };
+            case 'discord':
+                return { icon: '💬' };
+            case 'medium':
+                return { icon: '📝' };
+            case 'github':
+                return { icon: '💻' };
+            default:
+                return { icon: '🔗' };
+        }
+    };
+
+    const getXSearchUrl = (query: string): string => {
+        return `https://x.com/search?q=${encodeURIComponent(query)}`;
+    };
+
     return (
         <div className="token-card">
             <div className="rank">#{rank}</div>
@@ -116,6 +138,49 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     <div>Social Score: {token.socialScore.toFixed(2)}</div>
                 )}
                 <div>Total Score: {(token.totalScore || 0).toFixed(2)}</div>
+                <div className="social-links">
+                    {token.socials && token.socials.length > 0 ? (
+                        <div>
+                            Social Media: {' '}
+                            {token.socials.map((social, index) => (
+                                <a
+                                    key={index}
+                                    href={social.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="social-link"
+                                    title={social.type}
+                                >
+                                    {getSocialIcon(social.type).icon}
+                                </a>
+                            ))}
+                        </div>
+                    ) : (
+                        <div>Social Media: No social media</div>
+                    )}
+                </div>
+                <div className="x-search">
+                    Search X: {' '}
+                    <a 
+                        href={getXSearchUrl(token.address)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="x-search-link"
+                        title="Search for address on X"
+                    >
+                        CA
+                    </a>
+                    {' '} | {' '}
+                    <a 
+                        href={getXSearchUrl(token.symbol)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="x-search-link"
+                        title={`Search for $${token.symbol} on X`}
+                    >
+                        ${token.symbol}
+                    </a>
+                </div>
             </div>
         </div>
     );

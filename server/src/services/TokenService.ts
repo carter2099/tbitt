@@ -2,12 +2,18 @@ import axios from 'axios';
 import { DexScreenerPair, JupiterToken } from '../types/api';
 import { TokenAnalysis } from '../types/token';
 import { APIError } from '../types/errors';
+import { db } from '../db';
 
 // Add Token interface if not already defined
 interface Token {
     address: string;
     name: string;
     symbol: string;
+}
+
+interface SocialMedia {
+    type: string;
+    url: string;
 }
 
 export class TokenService {
@@ -52,6 +58,9 @@ export class TokenService {
                     sells24h: 0
                 };
             }
+
+            // Save social media information
+            await this.saveSocialMedia(token, pairData);
 
             // Find pair with highest volume for some metrics
             const highestVolumePair = pairData.reduce((max, pair) => 
@@ -132,5 +141,53 @@ export class TokenService {
 
     private calculateTokenScore(token: Token): number {
         return 0;
+    }
+
+    private async saveSocialMedia(token: Token, pairData: DexScreenerPair[]): Promise<void> {
+        // Find first pair with social info
+        const pairWithInfo = pairData.find(pair => {
+            const socials = pair.info?.socials;
+            return socials && socials.length > 0;
+        });
+
+        if(pairWithInfo?.info?.socials) {
+            console.log(`${token.name} has socials: ${pairWithInfo?.info?.socials?.reduce((acc, social) => acc + social.type + ', ', '')}`)
+        } else {
+            console.log(`${token.name} has no socials`)
+        }
+        
+        if (!pairWithInfo?.info?.socials) {
+            return;
+        }
+
+        try {
+            // First delete existing social media entries for this token
+            await db.query(
+                'DELETE FROM token_social_media WHERE token_address = $1',
+                [token.address]
+            );
+
+            // Insert new social media entries
+            const values = pairWithInfo.info.socials.map(social => ({
+                token_address: token.address,
+                social_type: social.type,
+                url: social.url
+            }));
+
+            if (values.length > 0) {
+                await db.query(`
+                    INSERT INTO token_social_media (token_address, social_type, url)
+                    SELECT v.token_address, v.social_type, v.url
+                    FROM jsonb_to_recordset($1::jsonb) AS v(
+                        token_address VARCHAR(255),
+                        social_type VARCHAR(50),
+                        url VARCHAR(512)
+                    )
+                `, [JSON.stringify(values)]);
+            }
+        } catch (error) {
+            console.error(`Failed to save social media for token ${token.address}:`, error);
+            // Don't throw error to avoid breaking the main analysis flow
+        }
     }
 } 

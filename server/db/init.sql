@@ -26,3 +26,14 @@ CREATE TABLE token (
 ); 
 
 CREATE INDEX idx_tokens_address ON token(address);
+
+CREATE TABLE token_social_media (
+    id SERIAL PRIMARY KEY,
+    token_address VARCHAR(255) REFERENCES token(address) ON DELETE CASCADE,
+    social_type VARCHAR(50) NOT NULL,
+    url VARCHAR(512) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(token_address, social_type)
+);
+
+CREATE INDEX idx_token_social_media_address ON token_social_media(token_address);

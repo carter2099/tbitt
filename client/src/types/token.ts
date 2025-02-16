@@ -13,4 +13,8 @@ export interface Token {
     totalScore: number;
     volume: number;
     socialScore?: number;
+    socials?: {
+        type: string;
+        url: string;
+    }[];
 } 

@@ -113,6 +113,22 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                     WHERE time_group IS NOT NULL
                 ) ranked
                 WHERE rn <= 20
+            ),
+            TokensWithSocials AS (
+                SELECT 
+                    lg.*,
+                    json_agg(
+                        json_build_object(
+                            'type', tsm.social_type,
+                            'url', tsm.url
+                        )
+                    ) FILTER (WHERE tsm.social_type IS NOT NULL) as socials
+                FROM LimitedGroups lg
+                LEFT JOIN token_social_media tsm ON lg.address = tsm.token_address
+                GROUP BY 
+                    lg.address, lg.name, lg.symbol, lg.mint_date, lg.current_price, 
+                    lg.price_change_24h, lg.volume_24h, lg.market_cap, lg.fdv, 
+                    lg.liquidity, lg.holder_count, lg.total_score, lg.time_group, lg.rn
             )
             SELECT 
                 time_group,
@@ -130,11 +146,12 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                         'liquidity', COALESCE(liquidity, 0),
                         'holderCount', COALESCE(holder_count, 0),
                         'totalScore', COALESCE(total_score, 0),
-                        'volume', COALESCE(volume_24h, 0)
+                        'volume', COALESCE(volume_24h, 0),
+                        'socials', COALESCE(socials, '[]'::json)
                     )
                     ORDER BY total_score DESC nulls last, mint_date DESC
                 ) as tokens
-            FROM LimitedGroups
+            FROM TokensWithSocials
             GROUP BY time_group
         `);
 

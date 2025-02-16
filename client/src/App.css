@@ -329,4 +329,53 @@ body {
 }
 
 /* Add cyberpunk font */
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap'); 
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+
+.social-links {
+    margin-top: 8px;
+}
+
+.social-link {
+    display: inline-block;
+    margin: 0 4px;
+    padding: 4px 8px;
+    text-decoration: none;
+    background-color: var(--darker-bg);
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.social-link:hover {
+    transform: scale(1.1);
+    background-color: var(--neon-blue);
+}
+
+.x-search {
+    margin-top: 8px;
+    padding: 4px 8px;
+    background-color: var(--darker-bg);
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.x-search-link {
+    color: var(--neon-blue);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    padding: 2px 6px;
+}
+
+.x-search-link:hover {
+    color: var(--neon-pink);
+    text-decoration: underline;
+}
+
+/* Remove the previous address link styles since we're not using them anymore */
+.token-card .metrics .address {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+} 
