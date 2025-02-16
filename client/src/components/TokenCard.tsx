@@ -1,5 +1,5 @@
 import React from 'react';
-import { Token } from '../types';
+import { Token } from '../types/token';
 
 interface TokenCardProps {
     token: Token;
@@ -62,6 +62,31 @@ function TokenCard({ token, rank }: TokenCardProps) {
         setTimeout(() => setCopyConfirm(false), 1500); // Reset after 1.5 seconds
     };
 
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        // Ensure we're comparing UTC timestamps
+        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+        if (diffInSeconds < 0) {
+            // If somehow in the future, show actual date
+            return date.toLocaleString();
+        }
+        if (diffInSeconds < 60) {
+            return `${diffInSeconds}s ago`;
+        }
+        if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes}m ago`;
+        }
+        if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours}h ago`;
+        }
+        // For older dates, show the full date and time
+        return date.toLocaleString();
+    };
+
     return (
         <div className="token-card">
             <div className="rank">#{rank}</div>
@@ -78,6 +103,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                         {copyConfirm ? '✓' : '📋'}
                     </button>
                 </div>
+                <div>Created: {formatDate(token.mintDate)}</div>
                 <div>Price: {formatPrice(token.currentPrice)}</div>
                 <div>24h Change: {formatPercentage(token.priceChange24h)}</div>
                 <div>24h Volume: {formatNumber(token.volume24h)}</div>
@@ -85,7 +111,9 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 <div>FDV: {formatNumber(token.fdv)}</div>
                 <div>Holders: {(token.holderCount || 0).toLocaleString()}</div>
                 <div>Liquidity: {formatNumber(token.liquidity)}</div>
-                {/* <div>Social Score: {token.socialScore.toFixed(2)}</div> */}
+                {token.socialScore !== undefined && (
+                    <div>Social Score: {token.socialScore.toFixed(2)}</div>
+                )}
                 <div>Total Score: {(token.totalScore || 0).toFixed(2)}</div>
             </div>
         </div>

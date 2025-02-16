@@ -2,6 +2,10 @@ import cron from 'node-cron';
 import { TokenService } from '../services/TokenService';
 import { db } from '../db';
 
+interface TokenRow {
+    address: string;
+}
+
 let isJobRunning = false;
 
 export async function importTokens() {
@@ -24,11 +28,13 @@ export async function importTokens() {
             name: token.name,
             symbol: token.symbol,
             import_date: new Date(),
-            mint_date: new Date(token.created_at)
+            // Convert Unix timestamp (seconds) to UTC PostgreSQL timestamp
+            mint_date: new Date(parseInt(token.created_at) * 1000).toISOString()
         }));
 
         if (values.length > 0) {
             console.log('Attempting to insert new tokens...');
+            console.log('Sample token mint_date:', values[0].mint_date);
 
             const result = await db.query(`
                 INSERT INTO token (address, name, symbol, import_date, mint_date)
@@ -59,7 +65,7 @@ export async function importTokens() {
                     tokensFound: newTokens.length,
                     tokensImported: result.rowCount,
                     duration: `${duration}ms`,
-                    importedAddresses: result.rows.map(r => r.address)
+                    importedAddresses: result.rows.map((r: TokenRow) => r.address)
                 }
             };
         }

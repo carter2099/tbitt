@@ -2,11 +2,15 @@ export interface Token {
     address: string;
     name: string;
     symbol: string;
-    volume24h: number;
-    holderCount: number;
-    liquidity: number;
-    socialScore: number;
-    totalScore: number;
-    priceChange24h: number;
+    mintDate: string;
     currentPrice: number;
+    priceChange24h: number;
+    volume24h: number;
+    marketCap: number;
+    fdv: number;
+    liquidity: number;
+    holderCount: number;
+    totalScore: number;
+    volume: number;
+    socialScore?: number;
 } 

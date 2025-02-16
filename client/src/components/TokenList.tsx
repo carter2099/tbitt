@@ -1,23 +1,23 @@
 import React from 'react';
+import { Token } from '../types/token';
 import TokenCard from './TokenCard';
-import { Token } from '../types';
 
 interface TokenListProps {
     tokens: Token[];
 }
 
-function TokenList({ tokens }: TokenListProps) {
-    if (!tokens.length) {
-        return <p>No tokens scanned yet</p>;
+export function TokenList({ tokens }: TokenListProps) {
+    if (!tokens?.length) {
+        return <p>No tokens found</p>;
     }
 
     return (
-        <div className="token-list">
-            {tokens.map((token, index) => (
-                <TokenCard key={token.address} token={token} rank={index + 1} />
-            ))}
+        <div className="token-list-container">
+            <div className="token-list">
+                {tokens.map((token, index) => (
+                    <TokenCard key={token.address} token={token} rank={index + 1} />
+                ))}
+            </div>
         </div>
     );
-}
-
-export default TokenList; 
+} 
