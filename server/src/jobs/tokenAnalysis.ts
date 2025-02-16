@@ -4,6 +4,19 @@ import { db } from '../db';
 
 let isAnalysisRunning = false;
 
+interface TokenAnalysis {
+    price: number;
+    priceChange24h: number;
+    volume24h: number;
+    marketCap: number;
+    fdv: number;
+    liquidity: number;
+    holderCount: number;
+    totalScore: number;
+    buys24h: number;
+    sells24h: number;
+}
+
 export async function analyzeRecentTokens() {
     if (isAnalysisRunning) {
         console.log('Token analysis job already running, skipping...');
@@ -31,7 +44,6 @@ export async function analyzeRecentTokens() {
 
         for (const token of tokens) {
             try {
-                console.log(`Analyzing token: ${token.name}`);
                 const analysis = await tokenService.analyzeToken(token);
 
                 if (analysis) {
@@ -46,8 +58,10 @@ export async function analyzeRecentTokens() {
                             liquidity = $6,
                             holder_count = $7,
                             total_score = $8,
+                            buys_24h = $9,
+                            sells_24h = $10,
                             last_analysis = NOW()
-                        WHERE address = $9
+                        WHERE address = $11
                     `, [
                         analysis.price,
                         analysis.priceChange24h,
@@ -57,6 +71,8 @@ export async function analyzeRecentTokens() {
                         analysis.liquidity,
                         analysis.holderCount,
                         analysis.totalScore,
+                        analysis.buys24h,
+                        analysis.sells24h,
                         token.address
                     ]);
                     analyzedCount++;

@@ -14,8 +14,10 @@ function App() {
     const [error, setError] = React.useState<string | null>(null);
     const [isImporting, setIsImporting] = React.useState(false);
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+    const [isScoring, setIsScoring] = React.useState(false);
     const [importResult, setImportResult] = React.useState<string | null>(null);
     const [analysisResult, setAnalysisResult] = React.useState<string | null>(null);
+    const [scoringResult, setScoringResult] = React.useState<string | null>(null);
     const [tokenGroups, setTokenGroups] = React.useState<TokenGroups>({
         last_15m: [],
         last_1h: [],
@@ -105,6 +107,32 @@ function App() {
         }
     };
 
+    const handleScore = async () => {
+        setError(null);
+        setScoringResult(null);
+        setIsScoring(true);
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/score-tokens`, {
+                method: 'POST',
+            });
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message);
+            }
+
+            setScoringResult(data.message);
+            // Refresh tokens after scoring
+            fetchTokens();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to score tokens');
+        } finally {
+            setIsScoring(false);
+        }
+    };
+
     if (isLoading) {
         return <div className="loading">Loading tokens...</div>;
     }
@@ -134,6 +162,13 @@ function App() {
                         >
                             {isAnalyzing ? 'Analyzing...' : 'Analyze Recent Tokens'}
                         </button>
+                        <button 
+                            className="scan-button"
+                            onClick={handleScore}
+                            disabled={isScoring}
+                        >
+                            {isScoring ? 'Scoring...' : 'Score Recent Tokens'}
+                        </button>
                     </div>
                     
                     {importResult && (
@@ -144,6 +179,11 @@ function App() {
                     {analysisResult && (
                         <div className="success-message">
                             {analysisResult}
+                        </div>
+                    )}
+                    {scoringResult && (
+                        <div className="success-message">
+                            {scoringResult}
                         </div>
                     )}
                 </div>

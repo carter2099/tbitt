@@ -23,4 +23,6 @@ export interface TokenAnalysis {
     totalScore: number;
     priceChange24h: number;
     fdv: number;
+    buys24h: number;
+    sells24h: number;
 }

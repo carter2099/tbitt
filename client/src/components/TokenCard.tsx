@@ -90,7 +90,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
     return (
         <div className="token-card">
             <div className="rank">#{rank}</div>
-            <h3>{token.name || 'Unknown'} ({token.symbol || '???'})</h3>
+            <h3>{token.name || 'Unknown'} (${token.symbol || '???'})</h3>
             <div className="metrics">
                 <div>
                     Address:{" "}

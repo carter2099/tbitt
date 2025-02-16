@@ -6,10 +6,11 @@ CREATE TABLE scan (
 );
 
 CREATE TABLE token (
-    id SERIAL PRIMARY KEY,
-    address VARCHAR(255) NOT NULL UNIQUE,
+    address VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255),
     symbol VARCHAR(255),
+    mint_date TIMESTAMP,
+    import_date TIMESTAMP,
     current_price DECIMAL,
     price_change_24h DECIMAL,
     volume_24h DECIMAL,
@@ -19,8 +20,9 @@ CREATE TABLE token (
     holder_count INTEGER,
     total_score DECIMAL,
     last_analysis TIMESTAMP,
-    mint_date TIMESTAMP,
-    import_date TIMESTAMP
-);
+    last_score TIMESTAMP,
+    buys_24h INTEGER DEFAULT 0,
+    sells_24h INTEGER DEFAULT 0
+); 
 
 CREATE INDEX idx_tokens_address ON token(address);

@@ -47,7 +47,9 @@ export class TokenService {
                     holderCount: 0,
                     totalScore: 0,
                     priceChange24h: 0,
-                    fdv: 0
+                    fdv: 0,
+                    buys24h: 0,
+                    sells24h: 0
                 };
             }
 
@@ -65,6 +67,13 @@ export class TokenService {
             const totalLiquidity = pairData.reduce((sum, pair) => 
                 sum + (pair.liquidity?.usd || 0), 0);
 
+            // Sum up buys and sells across all pairs for 24h period
+            const totalBuys24h = pairData.reduce((sum, pair) => 
+                sum + (pair.txns.h24?.buys || 0), 0);
+                
+            const totalSells24h = pairData.reduce((sum, pair) => 
+                sum + (pair.txns.h24?.sells || 0), 0);
+            
             console.log(`${token.name}: ${avgPrice}, ${totalVolume}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${this.calculateTokenScore(token)}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
             return {
                 price: avgPrice,
@@ -74,7 +83,9 @@ export class TokenService {
                 holderCount: this.getHolderData(token),
                 totalScore: this.calculateTokenScore(token),
                 priceChange24h: highestVolumePair.priceChange.h24 || 0,
-                fdv: highestVolumePair.fdv || 0
+                fdv: highestVolumePair.fdv || 0,
+                buys24h: totalBuys24h,
+                sells24h: totalSells24h
             };
         } catch (error) {
             console.error(`Error analyzing token ${token.name} (${token.address}):`, error instanceof Error ? error.message : 'Unknown error');
@@ -84,7 +95,6 @@ export class TokenService {
 
     private async getDexScreenerData(token: Token, overflow: boolean = false): Promise<DexScreenerPair[] | null> {
         try {
-            console.log(`Calling ${this.DEX_SCREENER_BASE_URL}/${token.address}`);
             const response = await axios.get<DexScreenerPair[]>(
                 `${this.DEX_SCREENER_BASE_URL}/${token.address}`
             );

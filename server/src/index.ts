@@ -4,6 +4,7 @@ import { AppError } from './types/errors';
 import dotenv from 'dotenv';
 import { startTokenImportJob, importTokens } from './jobs/tokenImport';
 import { startTokenAnalysisJob, analyzeRecentTokens } from './jobs/tokenAnalysis';
+import { startTokenScoringJob, scoreRecentTokens } from './jobs/tokenScoring';
 import { db } from './db';
 
 
@@ -18,6 +19,7 @@ app.use(express.json());
 // Start background jobs
 startTokenImportJob();
 startTokenAnalysisJob();
+startTokenScoringJob();
 
 // Add manual trigger endpoints
 app.post('/api/import-tokens', async (_req: Request, res: Response) => {
@@ -40,6 +42,18 @@ app.post('/api/analyze-tokens', async (_req: Request, res: Response) => {
         res.status(500).json({ 
             success: false, 
             message: 'Failed to trigger analysis' 
+        });
+    }
+});
+
+app.post('/api/score-tokens', async (_req: Request, res: Response) => {
+    try {
+        const result = await scoreRecentTokens();
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to trigger scoring' 
         });
     }
 });
@@ -86,6 +100,8 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                 FROM token t
                 CROSS JOIN TokenRanges r
                 WHERE t.mint_date > (SELECT latest_mint - INTERVAL '12 hours' FROM TokenRanges)
+                    AND t.total_score > 0
+                    AND t.total_score IS NOT NULL
                 ORDER BY t.mint_date DESC
             ),
             LimitedGroups AS (
@@ -116,7 +132,7 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                         'totalScore', COALESCE(total_score, 0),
                         'volume', COALESCE(volume_24h, 0)
                     )
-                    ORDER BY mint_date DESC
+                    ORDER BY total_score DESC nulls last, mint_date DESC
                 ) as tokens
             FROM LimitedGroups
             GROUP BY time_group
