@@ -24,11 +24,16 @@ function App() {
         last_6h: [],
         last_12h: []
     });
-    const [isLoading, setIsLoading] = React.useState(true);
+    const [initialLoading, setInitialLoading] = React.useState(true);
+    const [countdown, setCountdown] = React.useState(60);
 
-    const fetchTokens = async () => {
+    const fetchTokens = async (isInitial = false) => {
         try {
-            setIsLoading(true);
+            if (isInitial) {
+                setInitialLoading(true);
+            }
+            setCountdown(60); // Reset countdown after fetch
+            
             const response = await fetch(`${process.env.REACT_APP_API_URL}/api/tokens`);
             if (!response.ok) {
                 throw new Error('Failed to fetch tokens');
@@ -44,15 +49,25 @@ function App() {
             setError('Failed to fetch tokens');
             console.error('Error fetching tokens:', err);
         } finally {
-            setIsLoading(false);
+            if (isInitial) {
+                setInitialLoading(false);
+            }
         }
     };
 
     React.useEffect(() => {
-        fetchTokens();
-        // Refresh every minute
-        const interval = setInterval(fetchTokens, 60000);
+        fetchTokens(true);  // Initial load
+        const interval = setInterval(() => fetchTokens(false), 60000);  // Subsequent refreshes
         return () => clearInterval(interval);
+    }, []);
+
+    // Add countdown effect
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setCountdown(prev => Math.max(0, prev - 1));
+        }, 1000);
+
+        return () => clearInterval(timer);
     }, []);
 
     const handleImport = async () => {
@@ -133,17 +148,12 @@ function App() {
         }
     };
 
-    if (isLoading) {
+    if (initialLoading) {
         return <div className="loading">Loading tokens...</div>;
     }
 
     return (
         <div className="App">
-            <header className="App-header">
-                <h1>The Boys in the Trenches™</h1>
-                <p>Top Juicers</p>
-            </header>
-            
             <div className="dev-panel">
                 <h2>Dev Controls</h2>
                 <div className="dev-controls">
@@ -189,12 +199,20 @@ function App() {
                 </div>
             </div>
 
+            <header className="App-header">
+                <h1>The Boys in the Trenches™</h1>
+            </header>
+
             {error && (
                 <div className="error-message">
                     {error}
                 </div>
             )}
 
+            <p>Top Juicers</p>
+            <div className="refresh-countdown">
+                Automatically refreshing in {countdown}s
+            </div>
             <main className="token-sections">
                 <section>
                     <h2>Last 15 Minutes</h2>
