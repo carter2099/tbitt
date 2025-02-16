@@ -1,6 +1,32 @@
+/* Base theme colors */
+:root {
+    --neon-pink: #ff2a6d;
+    --neon-blue: #05d9e8;
+    --neon-purple: #b100ff;
+    --dark-bg: #1a1a2e;
+    --darker-bg: #121225;
+    --text-glow: 0 0 10px rgba(255, 42, 109, 0.5);
+    --neon-glow: 0 0 20px rgba(5, 217, 232, 0.4);
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+}
+
 .App {
     text-align: center;
     padding: 20px;
+    background-color: var(--dark-bg);
+    min-height: 100vh;
+}
+
+.App-header h1 {
+    color: var(--neon-pink);
+    text-shadow: var(--text-glow);
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
 }
 
 .scan-button {
@@ -8,22 +34,24 @@
     max-width: 200px;
     padding: 12px 24px;
     font-size: 16px;
-    background-color: #4CAF50;
+    background-color: var(--neon-purple);
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     margin: 0;  /* Remove margin since we're using gap */
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(177, 0, 255, 0.3);
 }
 
 .scan-button:hover {
-    background-color: #45a049;
+    background-color: var(--neon-pink);
+    box-shadow: 0 0 20px rgba(255, 42, 109, 0.5);
 }
 
 .scan-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    background-color: #444;
+    box-shadow: none;
 }
 
 .token-list-container {
@@ -42,21 +70,30 @@
 .token-card {
     flex: 0 0 300px; /* Fixed width, no growing or shrinking */
     width: 300px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--neon-purple);
     border-radius: 8px;
     padding: 15px;
     position: relative;
-    background: white;
+    background: var(--darker-bg);
+    box-shadow: 0 0 15px rgba(177, 0, 255, 0.2);
+    color: #fff;
+}
+
+.token-card:hover {
+    box-shadow: 0 0 25px rgba(177, 0, 255, 0.4);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
 }
 
 .token-card .rank {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: #4CAF50;
+    background-color: var(--neon-pink);
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
+    box-shadow: 0 0 10px rgba(255, 42, 109, 0.5);
 }
 
 .token-card .metrics .address {
@@ -96,27 +133,30 @@
 }
 
 .error-message {
-    background-color: #ffebee;
-    color: #c62828;
+    background-color: rgba(255, 42, 109, 0.1);
+    color: var(--neon-pink);
     padding: 12px;
     border-radius: 4px;
     margin: 16px 0;
     text-align: center;
-    border: 1px solid #ef9a9a;
+    border: 1px solid var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255, 42, 109, 0.3);
 }
 
 /* Update admin panel styles to dev panel */
 .dev-panel {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: var(--darker-bg);
+    border: 1px solid var(--neon-blue);
     border-radius: 8px;
     padding: 20px;
     margin: 20px auto;
     max-width: 600px;
+    box-shadow: var(--neon-glow);
 }
 
 .dev-panel h2 {
-    color: #333;
+    color: var(--neon-blue);
+    text-shadow: var(--text-glow);
     margin-bottom: 20px;
 }
 
@@ -217,13 +257,14 @@
 }
 
 .success-message {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+    background-color: rgba(5, 217, 232, 0.1);
+    color: var(--neon-blue);
     padding: 12px;
     border-radius: 4px;
     margin: 16px 0;
     text-align: center;
-    border: 1px solid #a5d6a7;
+    border: 1px solid var(--neon-blue);
+    box-shadow: var(--neon-glow);
 }
 
 .token-sections {
@@ -234,18 +275,20 @@
 }
 
 .token-sections section {
-    background: #fff;
+    background: var(--darker-bg);
+    border: 1px solid var(--neon-blue);
+    box-shadow: var(--neon-glow);
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
 }
 
 .token-sections h2 {
-    color: #333;
+    color: var(--neon-blue);
+    text-shadow: var(--text-glow);
+    border-bottom: 1px solid var(--neon-blue);
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
     position: sticky;
     left: 0;
 }
@@ -253,13 +296,15 @@
 .loading {
     text-align: center;
     padding: 40px;
-    font-size: 18px;
-    color: #666;
+    font-size: 1.2em;
+    color: var(--neon-blue);
+    text-shadow: var(--text-glow);
 }
 
 /* Add custom scrollbar styling */
 .token-list-container::-webkit-scrollbar {
     height: 8px;
+    background: var(--darker-bg);
 }
 
 .token-list-container::-webkit-scrollbar-track {
@@ -268,17 +313,20 @@
 }
 
 .token-list-container::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--neon-purple);
     border-radius: 4px;
 }
 
 .token-list-container::-webkit-scrollbar-thumb:hover {
-    background: #666;
+    background: var(--neon-pink);
 }
 
 .refresh-countdown {
+    color: var(--neon-blue);
     font-size: 0.9em;
-    color: #666;
-    margin-top: 8px;
-    margin-bottom: 16px;
-} 
+    margin: 8px 0 16px 0;
+    text-shadow: 0 0 5px rgba(5, 217, 232, 0.3);
+}
+
+/* Add cyberpunk font */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap'); 

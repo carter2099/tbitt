@@ -111,7 +111,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 <div>FDV: {formatNumber(token.fdv)}</div>
                 {/* <div>Holders: {(token.holderCount || 0).toLocaleString()}</div> */}
                 <div>Holders: TODO</div>
-                <div>Liquidity: {formatNumber(token.liquidity)}</div>
+                <div>Liquidity: {token.liquidity && token.liquidity > 0 ? formatNumber(token.liquidity) : '?'}</div>
                 {token.socialScore !== undefined && (
                     <div>Social Score: {token.socialScore.toFixed(2)}</div>
                 )}
