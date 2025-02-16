@@ -4,16 +4,20 @@ import { TokenAnalysis } from '../types/token';
 import { APIError } from '../types/errors';
 import { db } from '../db';
 
-// Add Token interface if not already defined
-interface Token {
+// Update the Token interface at the top of the file
+export interface ScoringToken {
     address: string;
     name: string;
     symbol: string;
-    volume_24h: number;
-    market_cap: number;
-    buys_24h: number;
-    sells_24h: number;
-    price_change_24h: number;
+    volume24h: number | null;
+    marketCap: number | null;
+    txns24h: {
+        buys: number | null;
+        sells: number | null;
+    };
+    priceChange24h: number | null;
+    priceChangeM5?: number | null;
+    liquidity?: number | null;
 }
 
 interface SocialMedia {
@@ -41,7 +45,7 @@ export class TokenService {
         }
     }
 
-    async analyzeToken(token: Token): Promise<TokenAnalysis> {
+    async analyzeToken(token: ScoringToken): Promise<TokenAnalysis> {
         try {
             console.log(`Getting token data for ${token.name}...`);
             
@@ -51,22 +55,22 @@ export class TokenService {
             if (!pairData || pairData.length === 0) {
                 console.log(`No pair data found for ${token.name}`);
                 return {
-                    price: 0,
-                    volume24h: 0,
-                    volumeH6: 0,
-                    volumeH1: 0,
-                    volumeM5: 0,
-                    marketCap: 0,
-                    liquidity: 0,
-                    holderCount: 0,
-                    totalScore: 0,
-                    priceChange24h: 0,
-                    priceChangeH6: 0,
-                    priceChangeH1: 0,
-                    priceChangeM5: 0,
-                    fdv: 0,
-                    buys24h: 0,
-                    sells24h: 0
+                    price: null,
+                    volume24h: null,
+                    volumeH6: null,
+                    volumeH1: null,
+                    volumeM5: null,
+                    marketCap: null,
+                    liquidity: null,
+                    holderCount: null,
+                    totalScore: null,
+                    priceChange24h: null,
+                    priceChangeH6: null,
+                    priceChangeH1: null,
+                    priceChangeM5: null,
+                    fdv: null,
+                    buys24h: null,
+                    sells24h: null
                 };
             }
 
@@ -82,37 +86,39 @@ export class TokenService {
                 sum + parseFloat(pair.priceUsd), 0) / pairData.length;
             
             const totalVolumeM5 = pairData.reduce((sum, pair) => 
-                sum + (pair.volume.m5 || 0), 0);
+                pair.volume.m5 && sum !== null ? sum + pair.volume.m5 : sum, 0);
             
             const totalVolumeH1 = pairData.reduce((sum, pair) => 
-                sum + (pair.volume.h1 || 0), 0);
+                pair.volume.h1 && sum !== null ? sum + pair.volume.h1 : sum, 0);
             
             const totalVolumeH6 = pairData.reduce((sum, pair) => 
-                sum + (pair.volume.h6 || 0), 0);
+                pair.volume.h6 && sum !== null ? sum + pair.volume.h6 : sum, 0);
 
             const totalVolume24h = pairData.reduce((sum, pair) => 
-                sum + pair.volume.h24, 0);
+                pair.volume.h24 && sum !== null ? sum + pair.volume.h24 : sum, 0);
 
             const totalLiquidity = pairData.reduce((sum, pair) => 
-                sum + (pair.liquidity?.usd || 0), 0);
+                pair.liquidity?.usd && sum !== null ? sum + pair.liquidity.usd : sum, 0);
 
             // Sum up buys and sells across all pairs for 24h period
             const totalBuys24h = pairData.reduce((sum, pair) => 
-                sum + (pair.txns.h24?.buys || 0), 0);
+                pair.txns.h24?.buys && sum !== null ? sum + pair.txns.h24.buys : sum, 0);
                 
             const totalSells24h = pairData.reduce((sum, pair) => 
-                sum + (pair.txns.h24?.sells || 0), 0);
+                pair.txns.h24?.sells && sum !== null ? sum + pair.txns.h24.sells : sum, 0);
 
             // Calculate score with the metrics we have
             const score = await this.calculateTokenScore({
-                address: token.address,
-                name: token.name,
-                symbol: token.symbol,
-                volume_24h: totalVolume24h,
-                market_cap: highestVolumePair.marketCap || 0,
-                buys_24h: totalBuys24h,
-                sells_24h: totalSells24h,
-                price_change_24h: highestVolumePair.priceChange.h24 || 0
+                ...token,
+                volume24h: totalVolume24h,
+                marketCap: highestVolumePair.marketCap || null,
+                txns24h: {
+                    buys: totalBuys24h,
+                    sells: totalSells24h
+                },
+                priceChange24h: highestVolumePair.priceChange.h24 || null,
+                priceChangeM5: highestVolumePair.priceChange.m5 || null,
+                liquidity: totalLiquidity || null
             });
             
             console.log(`${token.name}: ${avgPrice}, ${totalVolume24h}, ${highestVolumePair.marketCap}, ${totalLiquidity}, ${this.getHolderData(token)}, ${score}, ${highestVolumePair.priceChange.h24}, ${highestVolumePair.fdv}`);
@@ -120,20 +126,20 @@ export class TokenService {
             return {
                 price: avgPrice,
                 volume24h: totalVolume24h,
-                volumeH6: totalVolumeH6,
-                volumeH1: totalVolumeH1,
-                volumeM5: totalVolumeM5,
-                marketCap: highestVolumePair.marketCap || 0,
-                liquidity: totalLiquidity,
-                holderCount: this.getHolderData(token),
-                totalScore: score,
-                priceChange24h: highestVolumePair.priceChange.h24 || 0,
-                priceChangeH6: highestVolumePair.priceChange.h6 || 0,
-                priceChangeH1: highestVolumePair.priceChange.h1 || 0,
-                priceChangeM5: highestVolumePair.priceChange.m5 || 0,
-                fdv: highestVolumePair.fdv || 0,
-                buys24h: totalBuys24h,
-                sells24h: totalSells24h
+                volumeH6: totalVolumeH6 || null,
+                volumeH1: totalVolumeH1 || null,
+                volumeM5: totalVolumeM5 || null,
+                marketCap: highestVolumePair.marketCap || null,
+                liquidity: totalLiquidity || null,
+                holderCount: this.getHolderData(token) || null,
+                totalScore: score || null,
+                priceChange24h: highestVolumePair.priceChange.h24 || null,
+                priceChangeH6: highestVolumePair.priceChange.h6 || null,
+                priceChangeH1: highestVolumePair.priceChange.h1 || null,
+                priceChangeM5: highestVolumePair.priceChange.m5 || null,
+                fdv: highestVolumePair.fdv || null,
+                buys24h: totalBuys24h || null,
+                sells24h: totalSells24h || null
             };
         } catch (error) {
             console.error(`Error analyzing token ${token.name} (${token.address}):`, error instanceof Error ? error.message : 'Unknown error');
@@ -141,7 +147,7 @@ export class TokenService {
         }
     }
 
-    private async getDexScreenerData(token: Token, callCount: number = 0): Promise<DexScreenerPair[] | null> {
+    private async getDexScreenerData(token: ScoringToken, callCount: number = 0): Promise<DexScreenerPair[] | null> {
         try {
             const response = await axios.get<DexScreenerPair[]>(
                 `${this.DEX_SCREENER_BASE_URL}/${token.address}`
@@ -174,52 +180,118 @@ export class TokenService {
         }
     }
 
-    private getHolderData(token: Token): number {
+    private getHolderData(token: ScoringToken): number {
         return 0;
     }
 
-    public async calculateTokenScore(token: Token): Promise<number> {
-        try {
-            // Get social media count for this token
-            const socialResult = await db.query(
-                'SELECT COUNT(*) as social_count FROM token_social_media WHERE token_address = $1',
-                [token.address]
-            );
-            const socialCount = parseInt(socialResult.rows[0]?.social_count || '0');
-
-            // Base metrics scoring
-            const volumeScore = Math.min(token.volume_24h / 1000, 100); // Max 100 points for volume
-            const marketCapScore = Math.min(token.market_cap / 10000, 50); // Max 50 points for market cap
-            
-            // Transaction activity scoring
-            const totalTx = token.buys_24h + token.sells_24h;
-            const txScore = Math.min(totalTx / 10, 30); // Max 30 points for transactions
-            
-            // Buy/Sell ratio scoring (positive ratio gets more points)
-            const txRatio = token.buys_24h / (token.sells_24h || 1);
-            const txRatioScore = Math.min(txRatio * 10, 20); // Max 20 points for buy/sell ratio
-            
-            // Price change scoring (moderate positive change is good)
-            let priceChangeScore = 0;
-            if (token.price_change_24h > 0 && token.price_change_24h < 100) {
-                priceChangeScore = Math.min(token.price_change_24h, 50); // Max 50 points for price change
-            }
-
-            // Social media presence scoring
-            const socialScore = Math.min(socialCount * 10, 30); // 10 points per social media, max 30 points
-
-            // Calculate total score
-            const totalScore = volumeScore + marketCapScore + txScore + txRatioScore + priceChangeScore + socialScore;
-
-            // Normalize to 0-100 range
-            return Math.min(Math.max(totalScore / 2.8, 0), 100);
-        } catch (error) {
-            console.error(`Error calculating score for token ${token.address}:`, error);
+    public async calculateTokenScore(token: ScoringToken): Promise<number | null> {
+        const txCount = (token.txns24h.buys || 0) + (token.txns24h.sells || 0);
+    
+        // hard rules
+        if (token.marketCap && token.marketCap > 30000000) {
             return 0;
         }
+        if (token.priceChangeM5 && token.priceChangeM5 < -20) {
+            return 0;
+        }
+        if (token.priceChange24h && token.priceChange24h < -30) {
+            return 0;
+        }
+        if (token.marketCap && token.marketCap < 100000) {
+            return 0;
+        }
+        
+        const volumeWeight = 0.20;
+        const liquidityWeight = 0.35;
+        const holderWeight = 0.15;
+        const txCountWeight = 0.25;
+        const priceActionWeight = 0.05;
+    
+        // Volume score - Compare 24h volume to liquidity
+        const liquidity = token.liquidity ?? 0;
+        const volumeToLiquidityRatio = (token.volume24h && liquidity > 0) ? token.volume24h / liquidity : 0;
+        const volumeScore = volumeToLiquidityRatio ? Math.min(Math.max(volumeToLiquidityRatio / 3, 0), 1) : 0;
+    
+        // Liquidity score
+        const liquidityScore = (liquidity > 0) ? 
+            Math.min(Math.log10(liquidity) / Math.log10(1000000), 1) : 0;
+    
+        // Holder score
+        // const holderScore = token.holder_count > 0 ? 
+        //     Math.min(Math.log10(token.holder_count) / Math.log10(1000), 1) : 0;
+        const holderScore = 0;
+    
+        // Transaction count score
+        const txScore = txCount > 0 ? 
+            Math.min(Math.log10(txCount) / Math.log10(1000), 1) : 0;
+    
+        // Price action scoring
+        let priceActionScore = 0;
+        let priceChange = 0;
+        if(token.priceChange24h) {
+            priceChange = token.priceChange24h;
+            if (priceChange > 0) {
+                if (priceChange <= 50) {
+                    priceActionScore = Math.min(priceChange / 50, 1);
+                } else {
+                    priceActionScore = Math.max(0.5, 1 - ((priceChange - 50) / 150));
+                }
+            } else {
+                const normalizedDrop = Math.abs(priceChange);
+                if (normalizedDrop <= 10) {
+                    priceActionScore = Math.max(0, 1 - (normalizedDrop / 10));
+                } else {
+                    priceActionScore = Math.max(0, Math.exp(-0.15 * (normalizedDrop - 10)) * 0.5);
+                }
+            }
+        }
+    
+        // Calculate initial score
+        let totalScore = (
+            volumeScore * volumeWeight +
+            liquidityScore * liquidityWeight +
+            holderScore * holderWeight +
+            txScore * txCountWeight +
+            priceActionScore * priceActionWeight
+        );
+    
+        // Add buy/sell ratio penalty
+        const buys = token.txns24h.buys || 0;
+        const sells = token.txns24h.sells || 0;
+        
+        if (buys > 0) {
+            const buyToSellRatio = sells > 0 ? buys / sells : buys;
+            let ratioPenalty = 0;
+    
+            if (buys <= 7 || buyToSellRatio <= 4) {
+                ratioPenalty = 0;
+            }
+            else if (sells === 0) {
+                ratioPenalty = Math.min(0.9, (buys - 7) / 50);
+            } else {
+                ratioPenalty = Math.min(0.7, (buyToSellRatio - 4) / 20);
+            }
+    
+            totalScore *= (1 - ratioPenalty);
+        }
+    
+        // Apply penalties for price drops
+        if (priceChange < 0) {
+            const dropPenaltyFactor = Math.abs(priceChange) / 100;
+            const penaltyMultiplier = Math.exp(-dropPenaltyFactor * 2);
+            totalScore *= penaltyMultiplier;
+    
+            if (priceChange < -10) totalScore *= 0.7;
+            if (priceChange < -20) totalScore *= 0.5;
+            if (priceChange < -30) totalScore *= 0.3;
+            if (priceChange < -50) totalScore *= 0.1;
+            if (priceChange < -70) totalScore *= 0.01;
+        }
+    
+        return totalScore * 100;
     }
 
-    private async saveSocialMedia(token: Token, pairData: DexScreenerPair[]): Promise<void> {
+    private async saveSocialMedia(token: ScoringToken, pairData: DexScreenerPair[]): Promise<void> {
         // Find first pair with social info
         const pairWithInfo = pairData.find(pair => {
             const socials = pair.info?.socials;

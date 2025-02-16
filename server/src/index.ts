@@ -96,6 +96,8 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                     t.liquidity,
                     t.holder_count,
                     t.total_score,
+                    t.txns_24h_buys,
+                    t.txns_24h_sells,
                     CASE 
                         WHEN t.mint_date > r.latest_mint - INTERVAL '15 minutes' THEN 'last_15m'
                         WHEN t.mint_date > r.latest_mint - INTERVAL '1 hour' AND t.mint_date <= r.latest_mint - INTERVAL '15 minutes' THEN 'last_1h'
@@ -133,7 +135,7 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                     lg.address, lg.name, lg.symbol, lg.mint_date, lg.current_price, 
                     lg.price_change_24h, lg.volume_24h, lg.volume_h1, lg.volume_h6, lg.volume_m5,
                     lg.market_cap, lg.fdv, lg.liquidity, lg.holder_count, lg.total_score, 
-                    lg.time_group, lg.rn
+                    lg.time_group, lg.rn, lg.txns_24h_buys, lg.txns_24h_sells
             )
             SELECT 
                 time_group,
@@ -143,18 +145,22 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                         'name', name,
                         'symbol', symbol,
                         'mintDate', mint_date AT TIME ZONE 'UTC',
-                        'currentPrice', COALESCE(current_price, 0),
-                        'priceChange24h', COALESCE(price_change_24h, 0),
-                        'volume24h', COALESCE(volume_24h, 0),
-                        'volumeH1', COALESCE(volume_h1, 0),
-                        'volumeM5', COALESCE(volume_m5, 0),
-                        'marketCap', COALESCE(market_cap, 0),
-                        'fdv', COALESCE(fdv, 0),
-                        'liquidity', COALESCE(liquidity, 0),
-                        'holderCount', COALESCE(holder_count, 0),
-                        'totalScore', COALESCE(total_score, 0),
-                        'volume', COALESCE(volume_24h, 0),
-                        'socials', COALESCE(socials, '[]'::json)
+                        'currentPrice', current_price,
+                        'priceChange24h', price_change_24h,
+                        'volume24h', volume_24h,
+                        'volumeH1', volume_h1,
+                        'volumeM5', volume_m5,
+                        'marketCap', market_cap,
+                        'fdv', fdv,
+                        'liquidity', liquidity,
+                        'holderCount', holder_count,
+                        'totalScore', total_score,
+                        'volume', volume_24h,
+                        'socials', COALESCE(socials, '[]'::json),
+                        'txns24h', json_build_object(
+                            'buys', txns_24h_buys,
+                            'sells', txns_24h_sells
+                        )
                     )
                     ORDER BY total_score DESC nulls last, volume_24h DESC
                 ) as tokens

@@ -218,22 +218,22 @@ function App() {
             </div>
             <main className="token-sections">
                 <section>
-                    <h2>Last 15 Minutes</h2>
+                    <h2>Last 15 Minutes (Degen)</h2>
                     <TokenList tokens={tokenGroups.last_15m} />
                 </section>
 
                 <section>
-                    <h2>Last Hour</h2>
+                    <h2>Last Hour (Memer)</h2>
                     <TokenList tokens={tokenGroups.last_1h} />
                 </section>
 
                 <section>
-                    <h2>Last 6 Hours</h2>
+                    <h2>Last 6 Hours (Le Investor)</h2>
                     <TokenList tokens={tokenGroups.last_6h} />
                 </section>
 
                 <section>
-                    <h2>Last 12 Hours</h2>
+                    <h2>Last 12 Hours (Warren Buffet)</h2>
                     <TokenList tokens={tokenGroups.last_12h} />
                 </section>
             </main>

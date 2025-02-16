@@ -15,40 +15,40 @@ export interface TokenData {
 }
 
 export interface TokenAnalysis {
-    price: number;
-    volume24h: number;
-    volumeH6: number;
-    volumeH1: number;
-    volumeM5: number;
-    marketCap: number;
-    liquidity: number;
-    holderCount: number;
-    totalScore: number;
-    priceChange24h: number;
-    priceChangeH6: number;
-    priceChangeH1: number;
-    priceChangeM5: number;
-    fdv: number;
-    buys24h: number;
-    sells24h: number;
+    price: number | null;
+    volume24h: number | null;
+    volumeH6: number | null;
+    volumeH1: number | null;
+    volumeM5: number | null;
+    marketCap: number | null;
+    liquidity: number | null;
+    holderCount: number | null;
+    totalScore: number | null;
+    priceChange24h: number | null;
+    priceChangeH6: number | null;
+    priceChangeH1: number | null;
+    priceChangeM5: number | null;
+    fdv: number | null;
+    buys24h: number | null;
+    sells24h: number | null;
 }
 
 export interface Token {
-    address: string;
-    name: string;
-    symbol: string;
-    mintDate: string;
-    currentPrice: number;
-    priceChange24h: number;
-    volume24h: number;
-    marketCap: number;
-    fdv: number;
-    liquidity: number;
-    holderCount: number;
-    totalScore: number;
-    priceChangeM5: number;
+    address: string | null;
+    name: string | null;
+    symbol: string | null;
+    mintDate: string | null;
+    currentPrice: number | null;
+    priceChange24h: number | null;
+    volume24h: number | null;
+    marketCap: number | null;
+    fdv: number | null;
+    liquidity: number | null;
+    holderCount: number | null;
+    totalScore: number | null;
+    priceChangeM5: number | null;
     txns24h: {
-        buys: number;
-        sells: number;
-    };
+        buys: number | null;
+        sells: number | null;
+    } | null;
 }

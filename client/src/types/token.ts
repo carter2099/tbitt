@@ -19,4 +19,8 @@ export interface Token {
         type: string;
         url: string;
     }[];
+    txns24h?: {
+        buys: number;
+        sells: number;
+    };
 } 

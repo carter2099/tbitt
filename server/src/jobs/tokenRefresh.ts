@@ -1,7 +1,8 @@
 import cron from 'node-cron';
 import { db } from '../db';
-import { TokenService } from '../services/TokenService';
+import { TokenService, ScoringToken } from '../services/TokenService';
 import { sleep } from '../utils';
+import { Token } from '../types/token';
 
 let isRefreshRunning = false;
 let isMediumTermRefreshRunning = false;
@@ -80,16 +81,22 @@ export async function refreshTopTokens() {
                     ]);
 
                     // Recalculate score
-                    const score = await tokenService.calculateTokenScore({
+                    const tokenForScoring: ScoringToken = {
                         address: token.address,
                         name: token.name,
                         symbol: token.symbol,
-                        volume_24h: analysis.volume24h,
-                        market_cap: analysis.marketCap,
-                        buys_24h: analysis.buys24h,
-                        sells_24h: analysis.sells24h,
-                        price_change_24h: analysis.priceChange24h
-                    });
+                        volume24h: analysis.volume24h,
+                        marketCap: analysis.marketCap,
+                        txns24h: {
+                            buys: analysis.buys24h,
+                            sells: analysis.sells24h
+                        },
+                        priceChange24h: analysis.priceChange24h,
+                        priceChangeM5: analysis.priceChangeM5,
+                        liquidity: analysis.liquidity
+                    };
+
+                    const score = await tokenService.calculateTokenScore(tokenForScoring);
 
                     await db.query(`
                         UPDATE token 
@@ -201,16 +208,22 @@ export async function refreshMediumTermTokens() {
                     ]);
 
                     // Recalculate score
-                    const score = await tokenService.calculateTokenScore({
+                    const tokenForScoring: ScoringToken = {
                         address: token.address,
                         name: token.name,
                         symbol: token.symbol,
-                        volume_24h: analysis.volume24h,
-                        market_cap: analysis.marketCap,
-                        buys_24h: analysis.buys24h,
-                        sells_24h: analysis.sells24h,
-                        price_change_24h: analysis.priceChange24h
-                    });
+                        volume24h: analysis.volume24h,
+                        marketCap: analysis.marketCap,
+                        txns24h: {
+                            buys: analysis.buys24h,
+                            sells: analysis.sells24h
+                        },
+                        priceChange24h: analysis.priceChange24h,
+                        priceChangeM5: analysis.priceChangeM5,
+                        liquidity: analysis.liquidity
+                    };
+
+                    const score = await tokenService.calculateTokenScore(tokenForScoring);
 
                     await db.query(`
                         UPDATE token 

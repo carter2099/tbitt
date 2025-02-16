@@ -109,7 +109,8 @@ function TokenCard({ token, rank }: TokenCardProps) {
         return `https://x.com/search?q=${encodeURIComponent(query)}`;
     };
 
-    const formatVolume = (volume: number) => {
+    const formatVolume = (volume: number | null) => {
+        if (volume == null || isNaN(volume)) return '0';
         if (volume >= 1000000) {
             return `$${(volume / 1000000).toFixed(2)}M`;
         } else if (volume >= 1000) {
@@ -157,7 +158,13 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 {token.socialScore !== undefined && (
                     <div>Social Score: {token.socialScore.toFixed(2)}</div>
                 )}
+                <div className="volume-metrics">
+                    <div>Volume 5m: {formatVolume(token.volumeM5)}</div>
+                    <div>Volume 1h: {formatVolume(token.volumeH1)}</div>
+                    <div>Volume 24h: {formatVolume(token.volume24h)}</div>
+                </div>
                 <div>Total Score: {(token.totalScore || 0).toFixed(2)}</div>
+                <br />
                 <div className="social-links">
                     {token.socials && token.socials.length > 0 ? (
                         <div>
@@ -200,11 +207,6 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     >
                         ${token.symbol}
                     </a>
-                </div>
-                <div className="volume-metrics">
-                    <div>Volume 5m: {formatVolume(token.volumeM5)}</div>
-                    <div>Volume 1h: {formatVolume(token.volumeH1)}</div>
-                    <div>Volume 24h: {formatVolume(token.volume24h)}</div>
                 </div>
             </div>
         </div>
