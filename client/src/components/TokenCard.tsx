@@ -125,20 +125,23 @@ function TokenCard({ token, rank }: TokenCardProps) {
 
     return (
         <div className="token-card">
-            <div className="rank">#{rank}</div>
-            <h3>
-                {token.name || 'Unknown'} ({token.symbol?.startsWith('$') ? token.symbol : '$' + (token.symbol || '???')})
-                <a 
-                    href={getDexScreenerUrl(token.address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="chart-link"
-                    title="View chart on DEX Screener"
-                >
-                    📈
-                </a>
-            </h3>
+            <div className="token-card-header">
+                <div className="token-card-title">
+                    <h3>{token.name}</h3>
+                    <a 
+                        href={`https://dexscreener.com/solana/${token.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="chart-link"
+                        title="View on DexScreener"
+                    >
+                        📈
+                    </a>
+                </div>
+                <div className="rank">#{rank}</div>
+            </div>
             <div className="metrics">
+                <h3>${token.symbol}</h3>
                 <div>
                     Address:{" "}
                     <span className="address">{formatAddress(token.address)}</span>

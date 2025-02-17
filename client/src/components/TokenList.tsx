@@ -12,12 +12,10 @@ export function TokenList({ tokens }: TokenListProps) {
     }
 
     return (
-        <div className="token-list-container">
-            <div className="token-list">
-                {tokens.map((token, index) => (
-                    <TokenCard key={token.address} token={token} rank={index + 1} />
-                ))}
-            </div>
+        <div className="token-list">
+            {tokens.map((token, index) => (
+                <TokenCard key={token.address} token={token} rank={index + 1} />
+            ))}
         </div>
     );
 } 

@@ -31,6 +31,7 @@ function App() {
     const [countdown, setCountdown] = React.useState(REFRESH_INTERVAL_SECONDS);
     const [showDevPanel, setShowDevPanel] = React.useState(false);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
+    const [activeTab, setActiveTab] = React.useState('last_15m');
 
     const fetchTokens = async (isInitial = false) => {
         try {
@@ -228,25 +229,40 @@ function App() {
             </div>
             <main className="token-sections">
                 {isRefreshing && <div className="refresh-flash" />}
-                <section>
-                    <h2>Last 15 Minutes (Degen)</h2>
-                    <TokenList tokens={tokenGroups.last_15m} />
-                </section>
+                
+                <div className="tabs">
+                    <button 
+                        className={`tab ${activeTab === 'last_15m' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_15m')}
+                    >
+                        Last 15m (Degen)
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'last_1h' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_1h')}
+                    >
+                        Last 1h (Memer)
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'last_6h' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_6h')}
+                    >
+                        Last 6h (Le Investor)
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'last_12h' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_12h')}
+                    >
+                        Last 12h (Warren Buffet)
+                    </button>
+                </div>
 
-                <section>
-                    <h2>Last Hour (Memer)</h2>
-                    <TokenList tokens={tokenGroups.last_1h} />
-                </section>
-
-                <section>
-                    <h2>Last 6 Hours (Le Investor)</h2>
-                    <TokenList tokens={tokenGroups.last_6h} />
-                </section>
-
-                <section>
-                    <h2>Last 12 Hours (Warren Buffet)</h2>
-                    <TokenList tokens={tokenGroups.last_12h} />
-                </section>
+                <div className="tab-content">
+                    {activeTab === 'last_15m' && <TokenList tokens={tokenGroups.last_15m} />}
+                    {activeTab === 'last_1h' && <TokenList tokens={tokenGroups.last_1h} />}
+                    {activeTab === 'last_6h' && <TokenList tokens={tokenGroups.last_6h} />}
+                    {activeTab === 'last_12h' && <TokenList tokens={tokenGroups.last_12h} />}
+                </div>
             </main>
 
             <div 
