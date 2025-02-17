@@ -1,4 +1,4 @@
-FROM node:22-alpine as builder
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -6,17 +6,6 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
-
-FROM node:22-alpine
-
-WORKDIR /app
-
-# Install serve
-RUN npm install -g serve
-
-# Copy built assets from builder stage
-COPY --from=builder /app/build ./build
 
 EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000"] 
+CMD ["npm", "start"] 

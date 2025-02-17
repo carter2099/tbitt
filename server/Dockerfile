@@ -11,10 +11,7 @@ RUN npm rebuild
 
 COPY . .
 
-# Build TypeScript for production
-RUN npm run build
-
 EXPOSE 3001
 
-# Use node to run the built JavaScript in production
-CMD ["node", "dist/index.js"] 
+# Use nodemon in development
+CMD ["npm", "run", "dev"] 
