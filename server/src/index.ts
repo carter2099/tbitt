@@ -7,17 +7,12 @@ import { startTokenAnalysisJob, analyzeRecentTokens } from './jobs/tokenAnalysis
 import { startTokenScoringJob, scoreRecentTokens } from './jobs/tokenScoring';
 import { startTokenRefreshJob } from './jobs/tokenRefresh';
 import { db } from './db';
-import https from 'https';
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
 
 
 dotenv.config();
 
 const app = express();
 const port = 3001;
-const httpsPort = 3443; // Standard HTTPS port for development
 
 app.use(cors());
 app.use(express.json());
@@ -212,50 +207,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     }
 });
 
-// Create HTTP server
-const httpServer = http.createServer(app);
-
-// Create HTTPS server if SSL certificates exist
-let httpsServer: https.Server | null = null;
-const sslPath = path.join(__dirname, '../ssl');
-
-try {
-    if (fs.existsSync(path.join(sslPath, 'private.key')) && fs.existsSync(path.join(sslPath, 'certificate.crt'))) {
-        const privateKey = fs.readFileSync(path.join(sslPath, 'private.key'), 'utf8');
-        const certificate = fs.readFileSync(path.join(sslPath, 'certificate.crt'), 'utf8');
-        
-        const credentials = {
-            key: privateKey,
-            cert: certificate
-        };
-
-        httpsServer = https.createServer(credentials, app);
-    }
-} catch (error) {
-    console.warn('Failed to load SSL certificates:', error);
-}
-
-// Start the servers
-httpServer.listen(port, () => {
-    console.log(`HTTP Server running at http://localhost:${port}`);
-});
-
-if (httpsServer) {
-    httpsServer.listen(httpsPort, () => {
-        console.log(`HTTPS Server running at https://localhost:${httpsPort}`);
-    });
-}
-
-// Handle graceful shutdown
 process.on('SIGTERM', () => {
     console.log('SIGTERM received. Cleaning up...');
-    httpServer.close(() => {
-        console.log('HTTP server closed');
-    });
-    if (httpsServer) {
-        httpsServer.close(() => {
-            console.log('HTTPS server closed');
-        });
-    }
     process.exit(0);
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
 });
