@@ -82,30 +82,19 @@ export class TokenService {
                 (pair.volume.h24 > max.volume.h24) ? pair : max, pairData[0]);
 
             // Calculate aggregated metrics
-            const avgPrice = pairData.reduce((sum, pair) => 
-                sum + parseFloat(pair.priceUsd), 0) / pairData.length;
+            const avgPrice = pairData.length > 0 
+                ? pairData.reduce((sum, pair) => sum + parseFloat(pair.priceUsd), 0) / pairData.length 
+                : null;
             
-            const totalVolumeM5 = pairData.reduce((sum, pair) => 
-                pair.volume.m5 && sum !== null ? sum + pair.volume.m5 : sum, 0);
-            
-            const totalVolumeH1 = pairData.reduce((sum, pair) => 
-                pair.volume.h1 && sum !== null ? sum + pair.volume.h1 : sum, 0);
-            
-            const totalVolumeH6 = pairData.reduce((sum, pair) => 
-                pair.volume.h6 && sum !== null ? sum + pair.volume.h6 : sum, 0);
-
-            const totalVolume24h = pairData.reduce((sum, pair) => 
-                pair.volume.h24 && sum !== null ? sum + pair.volume.h24 : sum, 0);
-
-            const totalLiquidity = pairData.reduce((sum, pair) => 
-                pair.liquidity?.usd && sum !== null ? sum + pair.liquidity.usd : sum, 0);
+            const totalVolumeM5 = this.sumValidValues(pairData, pair => pair.volume.m5);
+            const totalVolumeH1 = this.sumValidValues(pairData, pair => pair.volume.h1);
+            const totalVolumeH6 = this.sumValidValues(pairData, pair => pair.volume.h6);
+            const totalVolume24h = this.sumValidValues(pairData, pair => pair.volume.h24);
+            const totalLiquidity = this.sumValidValues(pairData, pair => pair.liquidity?.usd);
 
             // Sum up buys and sells across all pairs for 24h period
-            const totalBuys24h = pairData.reduce((sum, pair) => 
-                pair.txns.h24?.buys && sum !== null ? sum + pair.txns.h24.buys : sum, 0);
-                
-            const totalSells24h = pairData.reduce((sum, pair) => 
-                pair.txns.h24?.sells && sum !== null ? sum + pair.txns.h24.sells : sum, 0);
+            const totalBuys24h = this.sumValidValues(pairData, pair => pair.txns.h24?.buys);
+            const totalSells24h = this.sumValidValues(pairData, pair => pair.txns.h24?.sells);
 
             // Calculate score with the metrics we have
             const score = await this.calculateTokenScore({
@@ -337,5 +326,11 @@ export class TokenService {
             console.error(`Failed to save social media for token ${token.address}:`, error);
             // Don't throw error to avoid breaking the main analysis flow
         }
+    }
+
+    // Helper function to sum up values, returning null if no valid values exist
+    private sumValidValues<T>(arr: T[], getValue: (item: T) => number | null | undefined): number | null {
+        const validItems = arr.filter(item => getValue(item) !== null && getValue(item) !== undefined);
+        return validItems.length > 0 ? validItems.reduce((sum, item) => sum + getValue(item)!, 0) : null;
     }
 } 

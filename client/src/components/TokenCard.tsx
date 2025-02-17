@@ -127,7 +127,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
         <div className="token-card">
             <div className="rank">#{rank}</div>
             <h3>
-                {token.name || 'Unknown'} (${token.symbol || '???'})
+                {token.name || 'Unknown'} ({token.symbol?.startsWith('$') ? token.symbol : '$' + (token.symbol || '???')})
                 <a 
                     href={getDexScreenerUrl(token.address)}
                     target="_blank"
