@@ -188,6 +188,10 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
     }
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error(err);
