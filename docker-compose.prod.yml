@@ -1,14 +1,40 @@
 version: '3'
 services:
   client:
-    environment:
-      - REACT_APP_API_URL=http://server:3001
+    build: 
+      context: ./client
+      dockerfile: Dockerfile.prod
+    ports:
+      - "3000:3000"
     restart: unless-stopped
-
-  server:
     environment:
       - NODE_ENV=production
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     restart: unless-stopped
+    depends_on:
+      - db
 
   db:
-    restart: unless-stopped 
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+volumes:
+  pgdata: 

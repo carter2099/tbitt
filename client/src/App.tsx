@@ -2,6 +2,7 @@ import * as React from 'react';
 import './App.css';
 import { TokenList } from './components/TokenList';
 import { Token } from './types/token';
+import { config } from './config';
 
 interface TokenGroups {
     last_15m: Token[];
@@ -40,7 +41,7 @@ function App() {
             }
             setCountdown(REFRESH_INTERVAL_SECONDS);
             
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/tokens`);
+            const response = await fetch(`${config.API_URL}/api/tokens`);
             if (!response.ok) {
                 throw new Error('Failed to fetch tokens');
             }
@@ -86,7 +87,7 @@ function App() {
         setIsImporting(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/import-tokens`, {
+            const response = await fetch(`${config.API_URL}/api/import-tokens`, {
                 method: 'POST',
             });
             
@@ -112,7 +113,7 @@ function App() {
         setIsAnalyzing(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/analyze-tokens`, {
+            const response = await fetch(`${config.API_URL}/api/analyze-tokens`, {
                 method: 'POST',
             });
             
@@ -138,7 +139,7 @@ function App() {
         setIsScoring(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/score-tokens`, {
+            const response = await fetch(`${config.API_URL}/api/score-tokens`, {
                 method: 'POST',
             });
             

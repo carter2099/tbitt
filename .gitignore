@@ -45,4 +45,7 @@ server/build/
 
 # Misc
 .DS_Store
-*.log 
+*.log
+
+# Config files
+client/src/config.ts 
