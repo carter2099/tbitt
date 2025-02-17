@@ -10,6 +10,8 @@ interface TokenGroups {
     last_12h: Token[];
 }
 
+const REFRESH_INTERVAL_SECONDS = 30;
+
 function App() {
     const [error, setError] = React.useState<string | null>(null);
     const [isImporting, setIsImporting] = React.useState(false);
@@ -25,15 +27,18 @@ function App() {
         last_12h: []
     });
     const [initialLoading, setInitialLoading] = React.useState(true);
-    const [countdown, setCountdown] = React.useState(60);
+    const [countdown, setCountdown] = React.useState(REFRESH_INTERVAL_SECONDS);
     const [showDevPanel, setShowDevPanel] = React.useState(false);
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
 
     const fetchTokens = async (isInitial = false) => {
         try {
             if (isInitial) {
                 setInitialLoading(true);
+            } else {
+                setIsRefreshing(true);  // Start refresh effect
             }
-            setCountdown(60); // Reset countdown after fetch
+            setCountdown(REFRESH_INTERVAL_SECONDS);
             
             const response = await fetch(`${process.env.REACT_APP_API_URL}/api/tokens`);
             if (!response.ok) {
@@ -53,12 +58,16 @@ function App() {
             if (isInitial) {
                 setInitialLoading(false);
             }
+            // Remove the refresh effect after a short delay
+            if (!isInitial) {
+                setTimeout(() => setIsRefreshing(false), 500);
+            }
         }
     };
 
     React.useEffect(() => {
         fetchTokens(true);  // Initial load
-        const interval = setInterval(() => fetchTokens(false), 60000);  // Subsequent refreshes
+        const interval = setInterval(() => fetchTokens(false), REFRESH_INTERVAL_SECONDS * 1000);  // Convert seconds to milliseconds
         return () => clearInterval(interval);
     }, []);
 
@@ -217,6 +226,7 @@ function App() {
                 Automatically refreshing in {countdown}s
             </div>
             <main className="token-sections">
+                {isRefreshing && <div className="refresh-flash" />}
                 <section>
                     <h2>Last 15 Minutes (Degen)</h2>
                     <TokenList tokens={tokenGroups.last_15m} />

@@ -272,6 +272,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 40px;
+    position: relative;
 }
 
 .token-sections section {
@@ -281,6 +282,7 @@ body {
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
+    transition: box-shadow 0.3s ease-out, border-color 0.3s ease-out;
 }
 
 .token-sections h2 {
@@ -443,4 +445,99 @@ body {
     border-radius: 4px;
     background-color: rgba(255, 42, 109, 0.1);
     display: inline-block;
+}
+
+.refresh-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 42, 109, 0.3),  /* neon pink */
+        rgba(5, 217, 232, 0.3),    /* neon blue */
+        rgba(177, 0, 255, 0.3)     /* neon purple */
+    );
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1000;
+    animation: flash 0.4s cubic-bezier(0.11, 0, 0.5, 0);
+}
+
+/* Add animation to section borders during refresh */
+.refresh-flash ~ .token-sections section {
+    animation: borderGlow 0.4s cubic-bezier(0.11, 0, 0.5, 0);
+}
+
+.refresh-flash ~ .token-sections h2 {
+    animation: textGlow 0.4s cubic-bezier(0.11, 0, 0.5, 0);
+}
+
+@keyframes flash {
+    0% {
+        opacity: 0;
+        background: linear-gradient(
+            45deg,
+            rgba(255, 42, 109, 0.3),
+            rgba(5, 217, 232, 0.3),
+            rgba(177, 0, 255, 0.3)
+        );
+    }
+    30% {
+        opacity: 0.6;
+        background: linear-gradient(
+            45deg,
+            rgba(255, 42, 109, 0.4),
+            rgba(5, 217, 232, 0.4),
+            rgba(177, 0, 255, 0.4)
+        );
+    }
+    100% {
+        opacity: 0;
+        background: linear-gradient(
+            45deg,
+            rgba(255, 42, 109, 0.3),
+            rgba(5, 217, 232, 0.3),
+            rgba(177, 0, 255, 0.3)
+        );
+    }
+}
+
+@keyframes borderGlow {
+    0% {
+        box-shadow: var(--neon-glow);
+        border-color: var(--neon-blue);
+    }
+    30% {
+        box-shadow: 0 0 20px rgba(5, 217, 232, 0.8),
+                   0 0 40px rgba(5, 217, 232, 0.6),
+                   0 0 60px rgba(5, 217, 232, 0.4),
+                   0 0 80px rgba(5, 217, 232, 0.2);
+        border-color: #0ff;
+        transform: scale(1.01);
+    }
+    100% {
+        box-shadow: var(--neon-glow);
+        border-color: var(--neon-blue);
+        transform: scale(1);
+    }
+}
+
+@keyframes textGlow {
+    0% {
+        text-shadow: var(--text-glow);
+        color: var(--neon-blue);
+    }
+    30% {
+        text-shadow: 0 0 10px #0ff,
+                    0 0 20px #0ff,
+                    0 0 30px #0ff,
+                    0 0 40px #0ff;
+        color: #fff;
+    }
+    100% {
+        text-shadow: var(--text-glow);
+        color: var(--neon-blue);
+    }
 } 
