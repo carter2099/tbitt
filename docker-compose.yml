@@ -17,11 +17,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
+      - "3443:3443"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     volumes:
       - ./server/src:/app/src
       - ./server/nodemon.json:/app/nodemon.json
+      - ./server/ssl:/app/ssl
     depends_on:
       - db
 

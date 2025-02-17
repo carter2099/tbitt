@@ -49,3 +49,8 @@ server/build/
 
 # Config files
 client/src/config.ts 
+
+# SSL certificates
+server/ssl/*.key
+server/ssl/*.crt
+server/ssl/*.pem 
