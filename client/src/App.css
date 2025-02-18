@@ -584,6 +584,7 @@ body {
     top: 0;
     z-index: 10;
     background: var(--dark-bg);
+    padding: 8px 0;
     display: flex;
     gap: 8px;
     overflow-x: auto;
@@ -694,6 +695,11 @@ body {
         padding: 8px 10px;
         margin: 0 0 8px 0;
         width: 100%;
+    }
+
+    .token-card:hover {
+        box-shadow: 0 0 25px rgba(177, 0, 255, 0.4);
+        transition: all 0.3s ease;
     }
 }
 
