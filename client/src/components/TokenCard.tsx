@@ -141,7 +141,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 <div className="rank">#{rank}</div>
             </div>
             <div className="metrics">
-                <h3>${token.symbol}</h3>
+                <h3>{token.symbol.startsWith('$') ? token.symbol : `$${token.symbol}`}</h3>
                 <div>
                     Address:{" "}
                     <span className="address">{formatAddress(token.address)}</span>

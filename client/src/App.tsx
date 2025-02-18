@@ -235,25 +235,25 @@ function App() {
                         className={`tab ${activeTab === 'last_15m' ? 'active' : ''}`}
                         onClick={() => setActiveTab('last_15m')}
                     >
-                        Last 15m (Degen)
+                        Last 15m
                     </button>
                     <button 
                         className={`tab ${activeTab === 'last_1h' ? 'active' : ''}`}
                         onClick={() => setActiveTab('last_1h')}
                     >
-                        Last 1h (Memer)
+                        Last 1h
                     </button>
                     <button 
                         className={`tab ${activeTab === 'last_6h' ? 'active' : ''}`}
                         onClick={() => setActiveTab('last_6h')}
                     >
-                        Last 6h (Le Investor)
+                        Last 6h
                     </button>
                     <button 
                         className={`tab ${activeTab === 'last_12h' ? 'active' : ''}`}
                         onClick={() => setActiveTab('last_12h')}
                     >
-                        Last 12h (Warren Buffet)
+                        Last 12h
                     </button>
                 </div>
 
