@@ -178,16 +178,19 @@ export class TokenService {
     
         // hard rules
         if (token.marketCap && token.marketCap > 30000000) {
-            return 0;
+            return 1;
         }
         if (token.priceChangeM5 && token.priceChangeM5 < -20) {
-            return 0;
+            return 1;
         }
         if (token.priceChange24h && token.priceChange24h < -30) {
-            return 0;
+            return 1;
         }
         if (token.marketCap && token.marketCap < 100000) {
-            return 0;
+            return 1;
+        }
+        if (token.liquidity !== null && token.liquidity !== undefined && token.liquidity < 5000) {
+            return 1;
         }
         
         const volumeWeight = 0.20;
