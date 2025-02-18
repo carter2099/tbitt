@@ -123,6 +123,10 @@ function TokenCard({ token, rank }: TokenCardProps) {
         return `https://dexscreener.com/solana/${address}`;
     };
 
+    const formatSymbol = (symbol: string): string => {
+        return symbol.startsWith('$') ? symbol : `$${symbol}`;
+    };
+
     return (
         <div className="token-card">
             <div className="token-card-header">
@@ -141,7 +145,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 <div className="rank">#{rank}</div>
             </div>
             <div className="metrics">
-                <h3>{token.symbol.startsWith('$') ? token.symbol : `$${token.symbol}`}</h3>
+                <h3>{formatSymbol(token.symbol)}</h3>
                 <div>
                     Address:{" "}
                     <span className="address">{formatAddress(token.address)}</span>
@@ -202,7 +206,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     </a>
                     {' '} | {' '}
                     <a 
-                        href={getXSearchUrl(token.symbol)}
+                        href={getXSearchUrl(formatSymbol(token.symbol))}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="x-search-link"

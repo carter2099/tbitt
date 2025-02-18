@@ -99,15 +99,15 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                     t.txns_24h_buys,
                     t.txns_24h_sells,
                     CASE 
-                        WHEN t.mint_date > r.latest_mint - INTERVAL '15 minutes' THEN 'last_15m'
-                        WHEN t.mint_date > r.latest_mint - INTERVAL '1 hour' AND t.mint_date <= r.latest_mint - INTERVAL '15 minutes' THEN 'last_1h'
-                        WHEN t.mint_date > r.latest_mint - INTERVAL '6 hours' AND t.mint_date <= r.latest_mint - INTERVAL '1 hour' THEN 'last_6h'
-                        WHEN t.mint_date > r.latest_mint - INTERVAL '12 hours' AND t.mint_date <= r.latest_mint - INTERVAL '6 hours' THEN 'last_12h'
+                        WHEN t.mint_date > r.latest_mint - INTERVAL '5 minutes' THEN 'last_5m'
+                        WHEN t.mint_date > r.latest_mint - INTERVAL '10 minutes' AND t.mint_date <= r.latest_mint - INTERVAL '5 minutes' THEN 'last_10m'
+                        WHEN t.mint_date > r.latest_mint - INTERVAL '15 minutes' AND t.mint_date <= r.latest_mint - INTERVAL '10 minutes' THEN 'last_15m'
+                        WHEN t.mint_date > r.latest_mint - INTERVAL '30 minutes' AND t.mint_date <= r.latest_mint - INTERVAL '15 minutes' THEN 'last_30m'
                     END as time_group
                 FROM token t
                 CROSS JOIN TokenRanges r
-                WHERE t.mint_date > (SELECT latest_mint - INTERVAL '12 hours' FROM TokenRanges)
-                    AND t.total_score > 0
+                WHERE t.mint_date > (SELECT latest_mint - INTERVAL '1 hours' FROM TokenRanges)
+                    AND t.total_score > 1
                     AND t.total_score IS NOT NULL
             ),
             LimitedGroups AS (
@@ -172,10 +172,10 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
             acc[row.time_group] = row.tokens;
             return acc;
         }, {
+            last_5m: [],
+            last_10m: [],
             last_15m: [],
-            last_1h: [],
-            last_6h: [],
-            last_12h: []
+            last_30m: []
         });
 
         res.json(tokensByTimeGroup);

@@ -5,13 +5,13 @@ import { Token } from './types/token';
 import { config } from './config';
 
 interface TokenGroups {
+    last_5m: Token[];
+    last_10m: Token[];
     last_15m: Token[];
-    last_1h: Token[];
-    last_6h: Token[];
-    last_12h: Token[];
+    last_30m: Token[];
 }
 
-const REFRESH_INTERVAL_SECONDS = 30;
+const REFRESH_INTERVAL_SECONDS = 10;
 
 function App() {
     const [error, setError] = React.useState<string | null>(null);
@@ -22,16 +22,16 @@ function App() {
     const [analysisResult, setAnalysisResult] = React.useState<string | null>(null);
     const [scoringResult, setScoringResult] = React.useState<string | null>(null);
     const [tokenGroups, setTokenGroups] = React.useState<TokenGroups>({
+        last_5m: [],
+        last_10m: [],
         last_15m: [],
-        last_1h: [],
-        last_6h: [],
-        last_12h: []
+        last_30m: []
     });
     const [initialLoading, setInitialLoading] = React.useState(true);
     const [countdown, setCountdown] = React.useState(REFRESH_INTERVAL_SECONDS);
     const [showDevPanel, setShowDevPanel] = React.useState(false);
     const [isRefreshing, setIsRefreshing] = React.useState(false);
-    const [activeTab, setActiveTab] = React.useState('last_15m');
+    const [activeTab, setActiveTab] = React.useState('last_5m');
 
     const fetchTokens = async (isInitial = false) => {
         try {
@@ -48,10 +48,10 @@ function App() {
             }
             const data = await response.json();
             setTokenGroups({
+                last_5m: data.last_5m || [],
+                last_10m: data.last_10m || [],
                 last_15m: data.last_15m || [],
-                last_1h: data.last_1h || [],
-                last_6h: data.last_6h || [],
-                last_12h: data.last_12h || []
+                last_30m: data.last_30m || []
             });
         } catch (err) {
             setError('Failed to fetch tokens');
@@ -232,36 +232,36 @@ function App() {
                 
                 <div className="tabs">
                     <button 
+                        className={`tab ${activeTab === 'last_5m' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_5m')}
+                    >
+                        5 Min
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'last_10m' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_10m')}
+                    >
+                        10 Min
+                    </button>
+                    <button 
                         className={`tab ${activeTab === 'last_15m' ? 'active' : ''}`}
                         onClick={() => setActiveTab('last_15m')}
                     >
-                        Last 15m
+                        15 Min
                     </button>
                     <button 
-                        className={`tab ${activeTab === 'last_1h' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('last_1h')}
+                        className={`tab ${activeTab === 'last_30m' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('last_30m')}
                     >
-                        Last 1h
-                    </button>
-                    <button 
-                        className={`tab ${activeTab === 'last_6h' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('last_6h')}
-                    >
-                        Last 6h
-                    </button>
-                    <button 
-                        className={`tab ${activeTab === 'last_12h' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('last_12h')}
-                    >
-                        Last 12h
+                        30 Min
                     </button>
                 </div>
 
                 <div className="tab-content">
+                    {activeTab === 'last_5m' && <TokenList tokens={tokenGroups.last_5m} />}
+                    {activeTab === 'last_10m' && <TokenList tokens={tokenGroups.last_10m} />}
                     {activeTab === 'last_15m' && <TokenList tokens={tokenGroups.last_15m} />}
-                    {activeTab === 'last_1h' && <TokenList tokens={tokenGroups.last_1h} />}
-                    {activeTab === 'last_6h' && <TokenList tokens={tokenGroups.last_6h} />}
-                    {activeTab === 'last_12h' && <TokenList tokens={tokenGroups.last_12h} />}
+                    {activeTab === 'last_30m' && <TokenList tokens={tokenGroups.last_30m} />}
                 </div>
             </main>
 

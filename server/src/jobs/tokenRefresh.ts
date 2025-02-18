@@ -19,7 +19,7 @@ export async function refreshTopTokens() {
     console.log(`[${startTime.toISOString()}] Starting top tokens refresh...`);
 
     try {
-        // Get top 500 tokens by score
+        // Get top 300 tokens by score
         const tokens = await db.query(`
             SELECT 
                 address,
@@ -28,7 +28,7 @@ export async function refreshTopTokens() {
             FROM token 
             WHERE total_score > 0
             ORDER BY total_score DESC
-            LIMIT 500
+            LIMIT 300
         `);
 
         let refreshedCount = 0;
@@ -146,17 +146,15 @@ export async function refreshMediumTermTokens() {
     console.log(`[${startTime.toISOString()}] Starting medium-term tokens refresh...`);
 
     try {
-        // Get tokens between 15m and 6h old with scores > 0
         const tokens = await db.query(`
             SELECT 
                 address,
                 name,
                 symbol
             FROM token 
-            WHERE mint_date BETWEEN NOW() - INTERVAL '6 hours' AND NOW() - INTERVAL '15 minutes'
+            WHERE mint_date BETWEEN NOW() - INTERVAL '15 minutes' AND NOW() - INTERVAL '5 minutes'
             AND total_score > 0
             ORDER BY total_score DESC
-            LIMIT 500
         `);
 
         let refreshedCount = 0;
