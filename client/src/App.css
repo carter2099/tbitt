@@ -63,7 +63,6 @@ body {
 .token-list {
     display: grid;
     gap: 20px;
-    padding: 0 4px;
     height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -630,29 +629,37 @@ body {
     background: var(--neon-pink);
 }
 
-/* Add responsive adjustments */
+/* Update the media queries for responsive grid layout */
 @media (min-width: 769px) {
     .token-list {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     }
 
     .token-sections {
         padding: 20px;
-        max-width: 1400px; /* Increase max width to give cards more room */
+        max-width: 1800px; /* Increased to allow for more columns */
     }
 
     .token-card {
         width: 90%;
-        margin: 10px;
-    }
-
-    /* Add some space between rows */
-    .token-list > * {
-        margin-bottom: 10px;
+        margin: 0;
     }
 }
 
-/* Keep mobile layout exactly as is */
+/* Add specific breakpoints for larger screens */
+@media (min-width: 1400px) {
+    .token-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1800px) {
+    .token-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Keep mobile layout as is */
 @media (max-width: 768px) {
     .token-list {
         display: flex;
