@@ -6,6 +6,7 @@ import { startTokenImportJob, importTokens } from './jobs/tokenImport';
 import { startTokenAnalysisJob, analyzeRecentTokens } from './jobs/tokenAnalysis';
 import { startTokenScoringJob, scoreRecentTokens } from './jobs/tokenScoring';
 import { startTokenRefreshJob } from './jobs/tokenRefresh';
+import { startTokenCleanupJob } from './jobs/tokenCleanup';
 import { db } from './db';
 
 
@@ -22,6 +23,7 @@ startTokenImportJob();
 startTokenAnalysisJob();
 startTokenScoringJob();
 startTokenRefreshJob();
+startTokenCleanupJob();
 
 // Add manual trigger endpoints
 app.post('/api/import-tokens', async (_req: Request, res: Response) => {
