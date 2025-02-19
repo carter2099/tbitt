@@ -186,8 +186,8 @@ export class TokenService {
         if (token.priceChange24h && token.priceChange24h < -30) {
             return 1;
         }
-        if (token.marketCap && token.marketCap < 100000) {
-            return 1;
+        if (token.marketCap && token.marketCap < 10000) {
+            return 2;
         }
         if (token.liquidity !== null && token.liquidity !== undefined && token.liquidity < 5000) {
             return 1;

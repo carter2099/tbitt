@@ -29,12 +29,10 @@ export async function analyzeRecentTokens() {
     console.log(`[${startTime.toISOString()}] Starting token analysis job...`);
 
     try {
-        // Get tokens from the last 15 minutes that haven't been analyzed
         const result = await db.query(`
             SELECT *
             FROM token
-            WHERE mint_date > NOW() - INTERVAL '15 minutes'
-            AND last_analysis IS NULL
+            WHERE mint_date > NOW() - INTERVAL '5 minutes'
         `);
 
         const tokens = result.rows;

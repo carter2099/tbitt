@@ -23,14 +23,18 @@ export async function importTokens() {
         console.log('Importing new tokens from Jupiter...');
         const newTokens = await tokenService.getNewTokens();
         
-        const values = newTokens.map(token => ({
-            address: token.mint,
-            name: token.name,
-            symbol: token.symbol,
-            import_date: new Date(),
-            // Convert Unix timestamp (seconds) to UTC PostgreSQL timestamp
-            mint_date: new Date(parseInt(token.created_at) * 1000).toISOString()
-        }));
+        const cutoffTime = new Date(Date.now() - 35 * 60 * 1000); // 35 minutes ago
+        
+        const values = newTokens.map(token => {
+            const mintDate = new Date(parseInt(token.created_at) * 1000);
+            return {
+                address: token.mint,
+                name: token.name,
+                symbol: token.symbol,
+                import_date: new Date(),
+                mint_date: mintDate.toISOString()
+            };
+        }).filter(token => new Date(token.mint_date) > cutoffTime);
 
         if (values.length > 0) {
             console.log('Attempting to insert new tokens...');

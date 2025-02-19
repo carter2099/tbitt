@@ -109,7 +109,7 @@ app.get('/api/tokens', async (_req: Request, res: Response) => {
                 FROM token t
                 CROSS JOIN TokenRanges r
                 WHERE t.mint_date > (SELECT latest_mint - INTERVAL '1 hours' FROM TokenRanges)
-                    AND t.total_score > 1
+                    AND t.total_score > 2
                     AND t.total_score IS NOT NULL
             ),
             LimitedGroups AS (

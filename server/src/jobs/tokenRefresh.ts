@@ -26,7 +26,7 @@ export async function refreshTopTokens() {
                 name,
                 symbol
             FROM token 
-            WHERE total_score > 0
+            WHERE total_score > 1
             AND mint_date > NOW() - INTERVAL '30 minutes'
             ORDER BY total_score DESC
             LIMIT 80
@@ -154,9 +154,11 @@ export async function refreshMediumTermTokens() {
                 symbol
             FROM token 
             WHERE mint_date BETWEEN NOW() - INTERVAL '15 minutes' AND NOW() - INTERVAL '5 minutes'
-            AND total_score > 0
+            AND total_score > 1
             ORDER BY total_score DESC
         `);
+
+        console.log(`Found ${tokens.rows.length} medium-term tokens to refresh`);
 
         let refreshedCount = 0;
         let errorCount = 0;

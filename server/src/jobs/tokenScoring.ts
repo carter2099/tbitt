@@ -39,7 +39,7 @@ export async function scoreRecentTokens() {
                 t.price_change_m5
             FROM token t
             WHERE t.mint_date > NOW() - INTERVAL '30 minutes'
-            and t.total_score > 0
+            and t.total_score > 1
         `);
 
         console.log(`Found ${tokens.rows.length} tokens to score`);
