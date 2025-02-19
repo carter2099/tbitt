@@ -183,9 +183,9 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     <div>Social Score: {token.socialScore.toFixed(2)}</div>
                 )}
                 <div className="volume-metrics">
-                    <div>Volume 5m: {formatVolume(token.volumeM5)}</div>
-                    <div>Volume 1h: {formatVolume(token.volumeH1)}</div>
-                    <div>Volume 24h: {formatVolume(token.volume24h)}</div>
+                    <div>Volume 5m:<br /> {formatVolume(token.volumeM5)}</div>
+                    <div>Volume 1h:<br /> {formatVolume(token.volumeH1)}</div>
+                    <div>Volume 24h:<br /> {formatVolume(token.volume24h)}</div>
                 </div>
                 {token.totalScore && (
                         <div 
