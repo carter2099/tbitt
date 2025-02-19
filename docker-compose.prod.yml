@@ -1,3 +1,9 @@
+# 172.18.0.2
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
 services:
   client:
     build: 
@@ -8,6 +14,9 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+    networks:
+      static-network:
+        ipv4_address: 172.18.0.2
 
   server:
     build:
@@ -21,6 +30,9 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+    networks:
+      static-network:
+        ipv4_address: 172.18.0.4
 
   db:
     image: postgres:17
@@ -34,6 +46,9 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
+    networks:
+      static-network:
+        ipv4_address: 172.18.0.3
 
 volumes:
   pgdata: 
