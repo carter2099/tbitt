@@ -128,7 +128,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
     };
 
     const getScoreIndicator = (score: number): { emoji: string; label: string; className: string } => {
-        if (score >= 80) {
+        if (score >= 70) {
             return { emoji: '🌟', label: 'Excellent', className: 'excellent' };
         }
         if (score >= 60) {
