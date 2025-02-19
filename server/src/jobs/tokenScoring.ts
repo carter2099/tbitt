@@ -38,7 +38,8 @@ export async function scoreRecentTokens() {
                 t.price_change_24h,
                 t.price_change_m5
             FROM token t
-            WHERE t.mint_date > NOW() - INTERVAL '24 hours'
+            WHERE t.mint_date > NOW() - INTERVAL '30 minutes'
+            and t.total_score > 0
         `);
 
         console.log(`Found ${tokens.rows.length} tokens to score`);
@@ -94,8 +95,8 @@ export async function scoreRecentTokens() {
 }
 
 export function startTokenScoringJob() {
-    // Run every 20 seconds
-    cron.schedule('*/20 * * * * *', async () => {
+    // Run every 5 seconds
+    cron.schedule('*/10 * * * * *', async () => {
         try {
             await scoreRecentTokens();
         } catch (error) {

@@ -153,8 +153,8 @@ export class TokenService {
                 if (callCount > 3) {
                     return null;
                 }
-                console.log('Rate limit hit, waiting 30 seconds...');
-                await new Promise(resolve => setTimeout(resolve, 30000));
+                console.log('Rate limit hit, waiting 60 seconds...');
+                await new Promise(resolve => setTimeout(resolve, 60000));
                 // Retry the request after waiting
                 return this.getDexScreenerData(token, callCount + 1);
             } else if (axios.isAxiosError(error)) {

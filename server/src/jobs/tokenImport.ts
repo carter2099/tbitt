@@ -97,8 +97,8 @@ export async function importTokens() {
 }
 
 export function startTokenImportJob() {
-    // Run every minute
-    cron.schedule('*/1 * * * *', async () => {
+    // Run every 20s
+    cron.schedule('*/20 * * * * *', async () => {
         console.log('Running scheduled token import...');
         const result = await importTokens();
     });

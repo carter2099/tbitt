@@ -19,7 +19,7 @@ export async function refreshTopTokens() {
     console.log(`[${startTime.toISOString()}] Starting top tokens refresh...`);
 
     try {
-        // Get top 300 tokens by score
+        // Get top recent tokens by score 
         const tokens = await db.query(`
             SELECT 
                 address,
@@ -27,8 +27,9 @@ export async function refreshTopTokens() {
                 symbol
             FROM token 
             WHERE total_score > 0
+            AND mint_date > NOW() - INTERVAL '30 minutes'
             ORDER BY total_score DESC
-            LIMIT 300
+            LIMIT 80
         `);
 
         let refreshedCount = 0;
@@ -110,7 +111,7 @@ export async function refreshTopTokens() {
                 }
 
                 // Add a small delay to avoid rate limiting
-                await sleep(200);
+                await sleep(400);
             } catch (error) {
                 console.error(`Failed to refresh token ${token.address}:`, error);
                 errorCount++;
@@ -235,7 +236,7 @@ export async function refreshMediumTermTokens() {
                 }
 
                 // Add a small delay to avoid rate limiting
-                await sleep(200);
+                await sleep(400);
             } catch (error) {
                 console.error(`Failed to refresh token ${token.address}:`, error);
                 errorCount++;
@@ -261,8 +262,8 @@ export async function refreshMediumTermTokens() {
 }
 
 export function startTokenRefreshJob() {
-    // Run recent tokens refresh every minute
-    cron.schedule('* * * * *', async () => {
+    // Run top tokens refresh every 30s
+    cron.schedule('*/30 * * * * *', async () => {
         try {
             await refreshTopTokens();
         } catch (error) {
@@ -270,8 +271,8 @@ export function startTokenRefreshJob() {
         }
     });
 
-    // Run medium-term tokens refresh every minute, offset by 30 seconds
-    cron.schedule('* * * * *', async () => {
+    // Run medium-term tokens refresh every 30s, offset by 30 seconds
+    cron.schedule('*/30 * * * * *', async () => {
         try {
             // Add a 30-second delay before running this job
             await sleep(30000);

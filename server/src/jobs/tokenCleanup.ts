@@ -14,10 +14,10 @@ export async function cleanupOldTokens() {
     console.log(`[${startTime.toISOString()}] Starting token cleanup...`);
 
     try {
-        // Delete tokens older than 6 hours
+        // Delete tokens older than 2 hours
         const result = await db.query(`
             DELETE FROM token 
-            WHERE mint_date < NOW() - INTERVAL '6 hours'
+            WHERE mint_date < NOW() - INTERVAL '2 hours'
             RETURNING address
         `);
 

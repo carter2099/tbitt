@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { TokenService } from '../services/TokenService';
 import { db } from '../db';
+import { sleep } from '../utils';
 
 let isAnalysisRunning = false;
 
@@ -118,8 +119,9 @@ export async function analyzeRecentTokens() {
 }
 
 export function startTokenAnalysisJob() {
-    // Run every minute
-    cron.schedule('*/1 * * * *', async () => {
+    // Run every 20s, offset by 10s
+    cron.schedule('*/20 * * * * *', async () => {
+        await sleep(10000);
         console.log('Running scheduled token analysis...');
         const result = await analyzeRecentTokens();
         console.log('Analysis result:', result);
