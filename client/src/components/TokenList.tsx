@@ -8,7 +8,7 @@ interface TokenListProps {
 
 export function TokenList({ tokens }: TokenListProps) {
     if (!tokens?.length) {
-        return <p>No tokens found</p>;
+        return <p>No tokens found. Patience King 👑</p>;
     }
 
     return (

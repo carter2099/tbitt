@@ -127,6 +127,22 @@ function TokenCard({ token, rank }: TokenCardProps) {
         return symbol.startsWith('$') ? symbol : `$${symbol}`;
     };
 
+    const getScoreIndicator = (score: number): { emoji: string; label: string; className: string } => {
+        if (score >= 80) {
+            return { emoji: '🌟', label: 'Excellent', className: 'excellent' };
+        }
+        if (score >= 60) {
+            return { emoji: '🚀', label: 'Great', className: 'great' };
+        }
+        if (score >= 50) {
+            return { emoji: '👍', label: 'Good', className: 'good' };
+        }
+        if (score >= 40) {
+            return { emoji: '😐', label: 'Average', className: 'average' };
+        }
+        return { emoji: '⚠️', label: 'Risky', className: 'terrible' };
+    };
+
     return (
         <div className="token-card">
             <div className="token-card-header">
@@ -141,6 +157,7 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     >
                         📈
                     </a>
+
                 </div>
                 <div className="rank">#{rank}</div>
             </div>
@@ -170,7 +187,16 @@ function TokenCard({ token, rank }: TokenCardProps) {
                     <div>Volume 1h: {formatVolume(token.volumeH1)}</div>
                     <div>Volume 24h: {formatVolume(token.volume24h)}</div>
                 </div>
-                <div>Total Score: {(token.totalScore || 0).toFixed(2)}</div>
+                {token.totalScore && (
+                        <div 
+                            className={`score-indicator ${getScoreIndicator(token.totalScore).className}`}
+                            title={`Score: ${token.totalScore.toFixed(2)}`}
+                        >
+                            Score: 
+                            <span>{(token.totalScore || 0).toFixed(2)}</span>
+                            <span className="emoji">{getScoreIndicator(token.totalScore).emoji}</span>
+                        </div>
+                    )}
                 <br />
                 <div className="social-links">
                     {token.socials && token.socials.length > 0 ? (
