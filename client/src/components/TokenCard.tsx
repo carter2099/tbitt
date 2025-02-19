@@ -109,14 +109,14 @@ function TokenCard({ token, rank }: TokenCardProps) {
         return `https://x.com/search?q=${encodeURIComponent(query)}`;
     };
 
-    const formatVolume = (volume: number | null) => {
-        if (volume == null || isNaN(volume)) return '0';
-        if (volume >= 1000000) {
-            return `$${(volume / 1000000).toFixed(2)}M`;
-        } else if (volume >= 1000) {
-            return `$${(volume / 1000).toFixed(2)}K`;
+    const formatLargeToHumanReadable = (num: number | null) => {
+        if (num == null || isNaN(num)) return '$0.00';
+        if (num >= 1000000) {
+            return `$${(num / 1000000).toFixed(2)}M`;
+        } else if (num >= 1000) {
+            return `$${(num / 1000).toFixed(2)}K`;
         }
-        return `$${volume.toFixed(2)}`;
+        return `$${num.toFixed(2)}`;
     };
 
     const getDexScreenerUrl = (address: string): string => {
@@ -176,16 +176,16 @@ function TokenCard({ token, rank }: TokenCardProps) {
                 </div>
                 <div>Created: {formatDate(token.mintDate)}</div>
                 <div>Price: {formatPrice(token.currentPrice)}</div>
-                <div>Market Cap: {formatNumber(token.marketCap)}</div>
+                <div>Market Cap: {formatLargeToHumanReadable(token.marketCap)}</div>
                 {/* <div>Holders: {(token.holderCount || 0).toLocaleString()}</div> */}
-                <div>Liquidity: {token.liquidity && token.liquidity > 0 ? formatNumber(token.liquidity) : '?'}</div>
+                <div>Liquidity: {token.liquidity && token.liquidity > 0 ? formatLargeToHumanReadable(token.liquidity) : '?'}</div>
                 {token.socialScore !== undefined && (
                     <div>Social Score: {token.socialScore.toFixed(2)}</div>
                 )}
                 <div className="volume-metrics">
-                    <div>Volume 5m:<br /> {formatVolume(token.volumeM5)}</div>
-                    <div>Volume 1h:<br /> {formatVolume(token.volumeH1)}</div>
-                    <div>Volume 24h:<br /> {formatVolume(token.volume24h)}</div>
+                    <div>Volume 5m:<br /> {formatLargeToHumanReadable(token.volumeM5)}</div>
+                    <div>Volume 1h:<br /> {formatLargeToHumanReadable(token.volumeH1)}</div>
+                    <div>Volume 24h:<br /> {formatLargeToHumanReadable(token.volume24h)}</div>
                 </div>
                 {token.totalScore && (
                         <div 
