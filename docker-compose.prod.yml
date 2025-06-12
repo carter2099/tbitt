@@ -1,43 +1,31 @@
-# 172.18.0.2
-networks:
-  static-network:
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
 services:
   client:
     build: 
       context: ./client
       dockerfile: Dockerfile.prod
     ports:
-      - "3000:3000"
+      - "13000:3000"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-    networks:
-      static-network:
-        ipv4_address: 172.18.0.2
 
   server:
     build:
       context: ./server
       dockerfile: Dockerfile.prod
     ports:
-      - "3001:3001"
+      - "13001:3001"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     restart: unless-stopped
     depends_on:
       - db
-    networks:
-      static-network:
-        ipv4_address: 172.18.0.4
 
   db:
     image: postgres:17
     ports:
-      - "5432:5432"
+      - "15432:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -46,9 +34,6 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
-    networks:
-      static-network:
-        ipv4_address: 172.18.0.3
 
 volumes:
   pgdata: 
