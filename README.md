@@ -1,6 +1,9 @@
 # tbitt
 The Boys in the Trenches™
 
+This app shows the user top memecoins on Solana launched in the past 5, 10, 15, 30 min based on an algorithm
+that takes into account price action, market cap, and other metrics.
+
 Made with Cursor and Claude 3.5 Sonnet. Worked very well for broad strokes in the beginning.
 Had to become more surgical as time went on. I was impressed with the ability to quickly add
 functionality using Cursor and Claude but the code quality left something to be desired.
