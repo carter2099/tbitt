@@ -26,7 +26,7 @@ interface SocialMedia {
 }
 
 export class TokenService {
-    private readonly JUPITER_NEW_TOKENS_URL = 'https://api.jup.ag/tokens/v1/new';
+    private readonly JUPITER_NEW_TOKENS_URL = 'https://lite-api.jup.ag/tokens/v1/new';
     private readonly DEX_SCREENER_BASE_URL = 'https://api.dexscreener.com/token-pairs/v1/solana';
 
     constructor() {
